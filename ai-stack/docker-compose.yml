@@ -1,0 +1,124 @@
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    networks:
+      - ai_frontend
+      - ai_backend
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_KEEP_ALIVE: 30m
+      OLLAMA_NUM_PARALLEL: 2
+      OLLAMA_MAX_LOADED_MODELS: 2
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        ollama serve &
+        sleep 5
+        ollama list | grep -q "qwen2.5:7b-instruct" || ollama pull qwen2.5:7b-instruct
+        ollama list | grep -q "qwen2.5-coder:7b"    || ollama pull qwen2.5-coder:7b
+        ollama list | grep -q "llama3.2:3b"          || ollama pull llama3.2:3b
+        wait
+
+  mongodb:
+    image: mongo:7
+    container_name: librechat-mongodb
+    restart: unless-stopped
+    networks:
+      - ai_backend
+    volumes:
+      - mongo:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: LibreChat
+
+  librechat:
+    image: ghcr.io/danny-avila/librechat:latest
+    container_name: librechat
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - ollama
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "3000:3080"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/LibreChat
+      OLLAMA_BASE_URL: http://ollama:11434
+
+      ALLOW_EMAIL_LOGIN: true
+      ALLOW_REGISTRATION: false
+      ALLOW_UNVERIFIED_EMAIL_LOGIN: true
+
+      # Generate with: openssl rand -hex 32
+      JWT_SECRET: REPLACE_WITH_HEX_SECRET
+      CREDS_KEY: REPLACE_WITH_HEX_SECRET
+      SESSION_SECRET: REPLACE_WITH_HEX_SECRET
+      REFRESH_TOKEN_SECRET: REPLACE_WITH_HEX_SECRET
+      JWT_REFRESH_SECRET: REPLACE_WITH_HEX_SECRET
+
+      CONFIG_BYPASS_VALIDATION: false
+      OPENAI_API_KEY: REPLACE_WITH_API_KEY   # optional — remove if not using OpenAI
+    volumes:
+      - /opt/librechat/librechat.yaml:/app/librechat.yaml:ro
+      - librechat_uploads:/app/client/public/uploads
+      - librechat_data:/app/data
+
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: anythingllm
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "3001:3001"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      OPENAI_API_KEY: REPLACE_WITH_API_KEY   # optional — remove if not using OpenAI
+      STORAGE_DIR: /app/server/storage
+      # Generate with: openssl rand -hex 32
+      JWT_SECRET: REPLACE_WITH_HEX_SECRET
+    volumes:
+      - anythingllm_storage:/app/server/storage
+
+  openclaw:
+    image: alpine/openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "18789:18789"   # HTTP
+      - "18791:18791"   # WebSocket gateway
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OPENAI_API_KEY: REPLACE_WITH_API_KEY   # optional — remove if not using OpenAI
+    volumes:
+      - openclaw_data:/data
+
+networks:
+  ai_frontend:
+    driver: bridge
+  ai_backend:
+    driver: bridge
+
+volumes:
+  ollama:
+  mongo:
+  librechat_uploads:
+  librechat_data:
+  anythingllm_storage:
+  openclaw_data:

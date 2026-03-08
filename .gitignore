@@ -1,0 +1,8 @@
+# Never commit actual secrets or overrides
+*.env
+.env.*
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
