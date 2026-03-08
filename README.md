@@ -14,6 +14,10 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
 | [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive |
 | [heimdall](heimdall/) | Home lab application dashboard — pin all your services in one place with live status tiles |
+| [nextcloud](nextcloud/) | Self-hosted file sync and share — Dropbox/Google Drive replacement with PostgreSQL and Redis |
+| [nginx-proxy-manager](nginx-proxy-manager/) | Reverse proxy with web UI and automatic Let's Encrypt SSL — no config files needed |
+| [wordpress](wordpress/) | Self-hosted WordPress with MariaDB and host-path storage for plugins, themes, and uploads |
+| [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps |
 
 ---
 
