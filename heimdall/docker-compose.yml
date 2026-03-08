@@ -1,0 +1,18 @@
+services:
+
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS (self-signed cert included)
+    volumes:
+      # Heimdall config, app database, and custom icons stored on host
+      - ./config:/config
+    environment:
+      # Set to your local timezone — see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      TZ: America/Chicago
+      # Run as your host user to avoid permission issues with the config folder
+      PUID: 1000
+      PGID: 1000
