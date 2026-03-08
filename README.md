@@ -11,6 +11,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | Stack | Description |
 |-------|-------------|
 | [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + OpenClaw — fully local AI with optional OpenAI fallback |
+| [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
 
 ---
 
