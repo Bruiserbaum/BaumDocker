@@ -12,6 +12,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 |-------|-------------|
 | [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + OpenClaw — fully local AI with optional OpenAI fallback |
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
+| [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive |
 
 ---
 
@@ -21,7 +22,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 - API keys use `REPLACE_WITH_API_KEY`
 - Optional environment variables are commented with `# optional`
 - Each stack uses isolated named networks (no cross-stack communication by default)
-- Persistent data is stored in named volumes
+- Persistent data uses either named Docker volumes or host path mounts (noted per stack)
 
 ---
 

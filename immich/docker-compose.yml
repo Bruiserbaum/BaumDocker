@@ -1,0 +1,70 @@
+# Immich — self-hosted photo and video backup
+# All persistent data is stored on host paths defined in .env
+# See .env.example for required variables
+
+services:
+
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    container_name: immich-server
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - database
+    ports:
+      - "2283:2283"
+    volumes:
+      # Primary photo/video storage — points to your external/NAS drive
+      - ${UPLOAD_LOCATION}:/usr/src/app/upload
+      # Gives Immich access to the host timezone
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      DB_HOSTNAME: database
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE_NAME: ${DB_DATABASE_NAME}
+      REDIS_HOSTNAME: redis
+      # Uncomment if accessing via a reverse proxy or external URL
+      # IMMICH_SERVER_URL: ${IMMICH_SERVER_URL}
+    env_file:
+      - .env
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    container_name: immich-machine-learning
+    restart: unless-stopped
+    volumes:
+      # ML model cache — downloaded once and reused across restarts
+      - ${ML_MODEL_CACHE}:/cache
+    env_file:
+      - .env
+
+  redis:
+    image: docker.io/redis:6.2-alpine
+    container_name: immich-redis
+    restart: unless-stopped
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  database:
+    image: docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0
+    container_name: immich-postgres
+    restart: unless-stopped
+    volumes:
+      # PostgreSQL data — recommend a fast local drive for this
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    env_file:
+      - .env
+    healthcheck:
+      test: pg_isready --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' || exit 1; Chksum="$$(psql --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')"; echo "checksum failure count - $Chksum"; [ "$Chksum" = '0' ] || exit 1
+      interval: 5m
+      start_interval: 30s
+      start_period: 5m
