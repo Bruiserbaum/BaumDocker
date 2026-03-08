@@ -1,0 +1,42 @@
+services:
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"     # HTTP web UI
+      - "8920:8920"     # HTTPS web UI (optional)
+      - "7359:7359/udp" # LAN auto-discovery
+      - "1900:1900/udp" # DLNA (optional — remove if not using DLNA clients)
+    volumes:
+      # Jellyfin config, database, and metadata cache
+      - ./config:/config
+      # Fast disk for transcoding temp files (RAM disk or SSD recommended)
+      - ./cache:/cache
+      # Media libraries — adjust paths to match your drive layout
+      - /path/to/your/movies:/movies
+      - /path/to/your/tv:/tv
+      - /path/to/your/music:/music
+    environment:
+      TZ: America/Chicago
+      PUID: 1000
+      PGID: 1000
+      # Hardware transcoding — uncomment your platform
+      # JELLYFIN_PublishedServerUrl: https://jellyfin.yourdomain.com  # for reverse proxy
+
+    # ── Intel Quick Sync / AMD VAAPI (uncomment to enable) ────────────────────
+    # devices:
+    #   - /dev/dri:/dev/dri
+
+    # ── NVIDIA GPU (uncomment to enable) ──────────────────────────────────────
+    # environment:
+    #   NVIDIA_VISIBLE_DEVICES: all
+    #   NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]

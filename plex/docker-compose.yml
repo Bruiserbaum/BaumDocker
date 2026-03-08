@@ -1,0 +1,51 @@
+services:
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    # Host network gives Plex full LAN visibility for GDM auto-discovery.
+    # Remove and use ports: below if you prefer bridge networking.
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      # Plex config, metadata, and database
+      - ./config:/config
+      # Media libraries — adjust paths to match your drive layout.
+      # Add additional volumes for more libraries (e.g. - /mnt/drive2/audiobooks:/audiobooks)
+      - /path/to/your/movies:/movies
+      - /path/to/your/tv:/tv
+      - /path/to/your/music:/music
+      # Optional — fast local disk for transcoding temp files
+      - /tmp/plex-transcode:/transcode
+    environment:
+      TZ: America/Chicago
+      PUID: 1000
+      PGID: 1000
+      # Claim token links this server to your Plex account on first start.
+      # Get a one-time token at: https://plex.tv/claim  (expires in 4 minutes)
+      PLEX_CLAIM: REPLACE_WITH_CLAIM_TOKEN
+      # Hardware transcoding — uncomment your platform (requires Plex Pass)
+      # NVIDIA_VISIBLE_DEVICES: all          # NVIDIA GPU
+      # NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+
+    # Uncomment for NVIDIA GPU transcoding:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+# ── Bridge networking alternative ─────────────────────────────────────────────
+# If you remove network_mode: host, expose these ports instead:
+# ports:
+#   - "32400:32400"     # Plex Media Server
+#   - "1900:1900/udp"   # DLNA
+#   - "5353:5353/udp"   # Bonjour/Avahi
+#   - "8324:8324"       # Roku via Plex Companion
+#   - "32410:32410/udp" # GDM network discovery
+#   - "32412:32412/udp"
+#   - "32413:32413/udp"
+#   - "32414:32414/udp"
+#   - "32469:32469"     # DLNA

@@ -19,6 +19,9 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [wordpress](wordpress/) | Self-hosted WordPress with MariaDB and host-path storage for plugins, themes, and uploads |
 | [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps |
 | [crafty](crafty/) | Web-based Minecraft server manager — create and run multiple Java and Bedrock servers |
+| [uptime-kuma](uptime-kuma/) | Self-hosted uptime monitor with status pages and 90+ alert integrations |
+| [plex](plex/) | Media server for movies, TV, and music — streams to any device with hardware transcode support |
+| [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support |
 
 ---
 
