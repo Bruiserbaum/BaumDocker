@@ -18,6 +18,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [nginx-proxy-manager](nginx-proxy-manager/) | Reverse proxy with web UI and automatic Let's Encrypt SSL — no config files needed |
 | [wordpress](wordpress/) | Self-hosted WordPress with MariaDB and host-path storage for plugins, themes, and uploads |
 | [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps |
+| [crafty](crafty/) | Web-based Minecraft server manager — create and run multiple Java and Bedrock servers |
 
 ---
 

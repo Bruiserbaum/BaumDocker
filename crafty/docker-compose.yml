@@ -1,0 +1,24 @@
+services:
+
+  crafty:
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    container_name: crafty
+    restart: unless-stopped
+    ports:
+      - "8000:8000"     # HTTP  — redirects to HTTPS
+      - "8443:8443"     # HTTPS — Crafty web UI
+      - "19132:19132/udp" # Bedrock Edition (optional — remove if not running Bedrock)
+      # Minecraft Java server ports — one per server you plan to run.
+      # Add more lines in sequence if you need more than 3 servers.
+      - "25565:25565"   # Server 1 (default Java port)
+      - "25566:25566"   # Server 2
+      - "25567:25567"   # Server 3
+    volumes:
+      # All Crafty data stored on host — servers, configs, backups, and logs
+      - ./data/backups:/crafty/backups
+      - ./data/logs:/crafty/logs
+      - ./data/servers:/crafty/servers
+      - ./data/config:/crafty/app/config
+      - ./data/import:/crafty/import
+    environment:
+      TZ: America/Chicago
