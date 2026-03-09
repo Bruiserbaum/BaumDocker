@@ -22,6 +22,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [uptime-kuma](uptime-kuma/) | Self-hosted uptime monitor with status pages and 90+ alert integrations |
 | [plex](plex/) | Media server for movies, TV, and music — streams to any device with hardware transcode support |
 | [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support |
+| [mumble](mumble/) | Self-hosted low-latency voice chat server — no accounts or subscriptions required |
 
 ---
 

@@ -10,23 +10,22 @@ services:
     volumes:
       # Plex config, metadata, and database
       - ./config:/config
-      # Media libraries — adjust paths to match your drive layout.
-      # Add additional volumes for more libraries (e.g. - /mnt/drive2/audiobooks:/audiobooks)
-      - /path/to/your/movies:/movies
-      - /path/to/your/tv:/tv
-      - /path/to/your/music:/music
-      # Optional — fast local disk for transcoding temp files
-      - /tmp/plex-transcode:/transcode
+      # Media libraries — paths set in .env pointing to your external drive
+      - ${MOVIES_PATH}:/movies
+      - ${TV_PATH}:/tv
+      - ${MUSIC_PATH}:/music
+      # Transcode scratch space — fast local SSD or RAM disk recommended
+      - ${TRANSCODE_PATH:-/tmp/plex-transcode}:/transcode
     environment:
-      TZ: America/Chicago
-      PUID: 1000
-      PGID: 1000
-      # Claim token links this server to your Plex account on first start.
-      # Get a one-time token at: https://plex.tv/claim  (expires in 4 minutes)
-      PLEX_CLAIM: REPLACE_WITH_CLAIM_TOKEN
+      TZ: ${TZ:-America/Chicago}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      PLEX_CLAIM: ${PLEX_CLAIM}
       # Hardware transcoding — uncomment your platform (requires Plex Pass)
-      # NVIDIA_VISIBLE_DEVICES: all          # NVIDIA GPU
+      # NVIDIA_VISIBLE_DEVICES: all
       # NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+    env_file:
+      - .env
 
     # Uncomment for NVIDIA GPU transcoding:
     # deploy:

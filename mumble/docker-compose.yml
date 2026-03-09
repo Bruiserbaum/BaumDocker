@@ -1,0 +1,27 @@
+services:
+
+  mumble:
+    image: mumblevoip/mumble-server:latest
+    container_name: mumble
+    restart: unless-stopped
+    ports:
+      - "64738:64738"       # Voice — TCP (client connections)
+      - "64738:64738/udp"   # Voice — UDP (audio traffic, lower latency)
+    volumes:
+      # Server config, database, and registered user data stored on host
+      - ./data:/data
+    environment:
+      # SuperUser password — used to administer the server via Mumble client
+      # Change this before starting the server
+      MUMBLE_SUPERUSER_PASSWORD: REPLACE_WITH_SUPERUSER_PASSWORD
+      # Server name shown in the public server list and client browser
+      MUMBLE_CONFIG_SERVERNAME: My Mumble Server
+      # Welcome message shown to users when they connect
+      MUMBLE_CONFIG_WELCOMETEXT: Welcome to the server.
+      # Maximum simultaneous users (0 = unlimited)
+      MUMBLE_CONFIG_USERS: 50
+      # Server bandwidth limit per user in bits/second (default: 72000 = 72 kbps)
+      MUMBLE_CONFIG_BANDWIDTH: 72000
+      # Set to true to register on the public Mumble server list
+      MUMBLE_CONFIG_REGISTERPUBLICSERVER: false
+      TZ: America/Chicago

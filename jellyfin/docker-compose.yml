@@ -14,16 +14,17 @@ services:
       - ./config:/config
       # Fast disk for transcoding temp files (RAM disk or SSD recommended)
       - ./cache:/cache
-      # Media libraries — adjust paths to match your drive layout
-      - /path/to/your/movies:/movies
-      - /path/to/your/tv:/tv
-      - /path/to/your/music:/music
+      # Media libraries — paths set in .env pointing to your external drive
+      - ${MOVIES_PATH}:/movies
+      - ${TV_PATH}:/tv
+      - ${MUSIC_PATH}:/music
     environment:
-      TZ: America/Chicago
-      PUID: 1000
-      PGID: 1000
-      # Hardware transcoding — uncomment your platform
-      # JELLYFIN_PublishedServerUrl: https://jellyfin.yourdomain.com  # for reverse proxy
+      TZ: ${TZ:-America/Chicago}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      # JELLYFIN_PublishedServerUrl: ${JELLYFIN_PublishedServerUrl}  # uncomment for reverse proxy
+    env_file:
+      - .env
 
     # ── Intel Quick Sync / AMD VAAPI (uncomment to enable) ────────────────────
     # devices:
