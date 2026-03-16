@@ -91,6 +91,36 @@ services:
     volumes:
       - anythingllm_storage:/app/server/storage
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    depends_on:
+      - ollama
+      - anythingllm
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_HOST: 0.0.0.0
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678   # change to your domain if behind a proxy
+      # Ollama — available as http://ollama:11434 inside workflows
+      OLLAMA_BASE_URL: http://ollama:11434
+      # AnythingLLM API — available as http://anythingllm:3001 inside workflows
+      ANYTHINGLLM_BASE_URL: http://anythingllm:3001
+      # Generate with: openssl rand -hex 32
+      N8N_ENCRYPTION_KEY: REPLACE_WITH_HEX_SECRET
+      N8N_USER_MANAGEMENT_JWT_SECRET: REPLACE_WITH_HEX_SECRET
+      # Optional: lock down with a first-run admin account
+      N8N_BASIC_AUTH_ACTIVE: false
+      GENERIC_TIMEZONE: America/New_York
+    volumes:
+      - n8n_data:/home/node/.n8n
+
   openclaw:
     image: alpine/openclaw:latest
     container_name: openclaw
@@ -121,4 +151,5 @@ volumes:
   librechat_uploads:
   librechat_data:
   anythingllm_storage:
+  n8n_data:
   openclaw_data:

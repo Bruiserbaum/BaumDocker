@@ -9,6 +9,7 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 | **Ollama** | 11434 | Local LLM runtime — serves models to all other services |
 | **LibreChat** | 3000 | Full-featured ChatGPT-style UI with multi-model support |
 | **AnythingLLM** | 3001 | RAG-enabled workspace chat with document uploads |
+| **n8n** | 5678 | Workflow automation — orchestrates Ollama and AnythingLLM via built-in nodes |
 | **OpenClaw** | 18789 / 18791 | Lightweight chat + agent gateway |
 | **MongoDB** | — (internal) | Database backend for LibreChat |
 
@@ -71,7 +72,38 @@ Ollama will pull models on first start — this may take several minutes dependi
 
 - LibreChat: `http://your-server-ip:3000`
 - AnythingLLM: `http://your-server-ip:3001`
+- n8n: `http://your-server-ip:5678`
 - OpenClaw: `http://your-server-ip:18789`
+
+## n8n + Ollama + AnythingLLM Integration
+
+n8n connects to both services over the internal `ai_backend` network using their container hostnames — no external URLs needed.
+
+### Calling Ollama from n8n
+
+Use the built-in **Ollama Chat Model** node (under AI nodes) or an **HTTP Request** node:
+
+- Base URL: `http://ollama:11434`
+- Generate endpoint: `POST http://ollama:11434/api/generate`
+- Chat endpoint: `POST http://ollama:11434/api/chat`
+
+### Calling AnythingLLM from n8n
+
+AnythingLLM exposes a REST API. Use the **HTTP Request** node:
+
+- Base URL: `http://anythingllm:3001/api`
+- Auth: Bearer token from AnythingLLM → Settings → API Keys
+- Example — chat with a workspace:
+  ```
+  POST http://anythingllm:3001/api/v1/workspace/{slug}/chat
+  Body: { "message": "...", "mode": "chat" }
+  ```
+
+### Example workflow ideas
+
+- Document ingested into AnythingLLM → n8n triggers a summarisation job via Ollama → sends result to Slack/email
+- Scheduled n8n workflow queries Ollama with a system prompt for daily briefings
+- Webhook → n8n → AnythingLLM workspace query → return response to caller
 
 ## GPU Acceleration (optional)
 
