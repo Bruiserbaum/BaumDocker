@@ -10,7 +10,6 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 | **LibreChat** | 3000 | Full-featured ChatGPT-style UI with multi-model support |
 | **AnythingLLM** | 3001 | RAG-enabled workspace chat with document uploads |
 | **n8n** | 5678 | Workflow automation — orchestrates Ollama and AnythingLLM via built-in nodes |
-| **OpenClaw** | 18789 / 18791 | Lightweight chat + agent gateway |
 | **MongoDB** | — (internal) | Database backend for LibreChat |
 
 ## Models pulled on first start
@@ -34,20 +33,21 @@ MongoDB is on `ai_backend` only — it has no exposed ports and is not reachable
 
 ## Setup
 
-### 1. Generate secrets
+### 1. Create your .env file
 
-Each secret should be a unique 64-character hex string:
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in every blank value. Generate each secret with:
 
 ```bash
 openssl rand -hex 32
 ```
 
-Replace all `REPLACE_WITH_HEX_SECRET` values in `docker-compose.yml` with separate generated values.
+Each secret field must have a **unique** value — do not reuse the same string across fields.
 
-### 2. Set API keys (optional)
-
-If you want OpenAI as a fallback model source, replace `REPLACE_WITH_API_KEY` with your key.
-Remove those lines entirely if you want a fully local setup.
+Set `OPENAI_API_KEY` if you want OpenAI as a fallback model source, or leave it blank for a fully local setup.
 
 ### 3. Create the LibreChat config
 
@@ -62,6 +62,7 @@ See the [LibreChat docs](https://www.librechat.ai/docs/configuration/librechat_y
 
 ### 4. Start the stack
 
+
 ```bash
 docker compose up -d
 ```
@@ -73,7 +74,6 @@ Ollama will pull models on first start — this may take several minutes dependi
 - LibreChat: `http://your-server-ip:3000`
 - AnythingLLM: `http://your-server-ip:3001`
 - n8n: `http://your-server-ip:5678`
-- OpenClaw: `http://your-server-ip:18789`
 
 ## n8n + Ollama + AnythingLLM Integration
 
