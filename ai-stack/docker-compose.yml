@@ -22,7 +22,7 @@ services:
         ollama serve &
         sleep 5
         ollama list | grep -q "qwen2.5:7b-instruct" || ollama pull qwen2.5:7b-instruct
-        ollama list | grep -q "qwen2.5-coder:7b"    || ollama pull qwen2.5-coder:7b
+        ollama list | grep -q "qwen3-coder"          || ollama pull qwen3-coder
         ollama list | grep -q "llama3.2:3b"          || ollama pull llama3.2:3b
         wait
 
@@ -126,11 +126,12 @@ services:
       LLM_MODEL: ${OPENHANDS_LLM_MODEL}
       LLM_BASE_URL: http://ollama:11434
       LLM_API_KEY: ollama
-      WORKSPACE_MOUNT_PATH: ${OPENHANDS_WORKSPACE_PATH}
+      WORKSPACE_MOUNT_PATH: /opt/workspace
+      SANDBOX_VOLUMES: openhands_workspace:/opt/workspace:rw
       SANDBOX_RUNTIME_CONTAINER_IMAGE: docker.io/all-hands-ai/runtime:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${OPENHANDS_WORKSPACE_PATH}:/opt/workspace:cached
+      - openhands_workspace:/opt/workspace
       - openhands_state:/root/.openhands-state
 
 networks:
@@ -146,4 +147,5 @@ volumes:
   librechat_data:
   anythingllm_storage:
   n8n_data:
+  openhands_workspace:
   openhands_state:
