@@ -24,4 +24,5 @@ services:
       # SMTP_USERNAME: ${SMTP_USERNAME}
       # SMTP_PASSWORD: ${SMTP_PASSWORD}
     env_file:
-      - .env
+      - path: .env
+        required: false

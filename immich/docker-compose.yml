@@ -27,7 +27,8 @@ services:
       # Uncomment if accessing via a reverse proxy or external URL
       # IMMICH_SERVER_URL: ${IMMICH_SERVER_URL}
     env_file:
-      - .env
+      - path: .env
+        required: false
 
   immich-machine-learning:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
@@ -37,7 +38,8 @@ services:
       # ML model cache — downloaded once and reused across restarts
       - ${ML_MODEL_CACHE}:/cache
     env_file:
-      - .env
+      - path: .env
+        required: false
 
   redis:
     image: docker.io/redis:6.2-alpine
@@ -62,7 +64,8 @@ services:
       POSTGRES_DB: ${DB_DATABASE_NAME}
       POSTGRES_INITDB_ARGS: "--data-checksums"
     env_file:
-      - .env
+      - path: .env
+        required: false
     healthcheck:
       test: pg_isready --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' || exit 1; Chksum="$$(psql --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')"; echo "checksum failure count - $Chksum"; [ "$Chksum" = '0' ] || exit 1
       interval: 5m

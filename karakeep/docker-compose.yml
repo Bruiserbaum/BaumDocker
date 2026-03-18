@@ -28,7 +28,8 @@ services:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}   # optional — remove if not using AI summarization
     env_file:
-      - .env
+      - path: .env
+        required: false
 
   chrome:
     image: gcr.io/zenika-hub/alpine-chrome:123
