@@ -1,0 +1,27 @@
+# Vaultwarden — self-hosted Bitwarden-compatible password manager
+# See .env.example for required variables
+
+services:
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    ports:
+      - "8222:80"
+    volumes:
+      # All vault data, attachments, and config stored on host
+      - ${DATA_FOLDER}:/data
+    environment:
+      DOMAIN: ${DOMAIN}
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      SIGNUPS_ALLOWED: ${SIGNUPS_ALLOWED:-false}
+      # Uncomment to enable email (SMTP) notifications
+      # SMTP_HOST: ${SMTP_HOST}
+      # SMTP_FROM: ${SMTP_FROM}
+      # SMTP_PORT: ${SMTP_PORT:-587}
+      # SMTP_SECURITY: ${SMTP_SECURITY:-starttls}
+      # SMTP_USERNAME: ${SMTP_USERNAME}
+      # SMTP_PASSWORD: ${SMTP_PASSWORD}
+    env_file:
+      - .env

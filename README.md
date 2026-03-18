@@ -23,6 +23,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [plex](plex/) | Media server for movies, TV, and music â€” streams to any device with hardware transcode support |
 | [jellyfin](jellyfin/) | Free open-source media server â€” no account or Plex Pass required, full hardware transcode support |
 | [mumble](mumble/) | Self-hosted low-latency voice chat server â€” no accounts or subscriptions required |
+| [vaultwarden](vaultwarden/) | Lightweight self-hosted Bitwarden-compatible password manager â€” works with all official Bitwarden clients |
 
 ---
 
@@ -68,7 +69,7 @@ Each stack can be deployed directly from this Git repository using Portainer's *
 
 | Field | Value |
 |-------|-------|
-| Repository URL | `https://github.com/Bnuss/BaumDocker` |
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
 | Repository reference | `refs/heads/master` |
 | Compose path | `<stack-folder>/docker-compose.yml` (e.g. `immich/docker-compose.yml`) |
 
