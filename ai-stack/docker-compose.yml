@@ -111,6 +111,28 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
+  openhands:
+    image: docker.io/all-hands-ai/openhands:latest
+    container_name: openhands
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "3002:3000"
+    environment:
+      LLM_MODEL: ${OPENHANDS_LLM_MODEL}
+      LLM_BASE_URL: http://ollama:11434
+      LLM_API_KEY: ollama
+      WORKSPACE_MOUNT_PATH: ${OPENHANDS_WORKSPACE_PATH}
+      SANDBOX_RUNTIME_CONTAINER_IMAGE: docker.io/all-hands-ai/runtime:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${OPENHANDS_WORKSPACE_PATH}:/opt/workspace:cached
+      - openhands_state:/root/.openhands-state
+
 networks:
   ai_frontend:
     driver: bridge
@@ -124,3 +146,4 @@ volumes:
   librechat_data:
   anythingllm_storage:
   n8n_data:
+  openhands_state:
