@@ -112,7 +112,7 @@ services:
       - n8n_data:/home/node/.n8n
 
   openhands:
-    image: docker.io/all-hands-ai/openhands:latest
+    image: ghcr.io/all-hands-ai/openhands:latest
     container_name: openhands
     restart: unless-stopped
     depends_on:
@@ -128,7 +128,7 @@ services:
       LLM_API_KEY: ollama
       WORKSPACE_MOUNT_PATH: /opt/workspace
       SANDBOX_VOLUMES: openhands_workspace:/opt/workspace:rw
-      SANDBOX_RUNTIME_CONTAINER_IMAGE: docker.io/all-hands-ai/runtime:latest
+      SANDBOX_RUNTIME_CONTAINER_IMAGE: ghcr.io/all-hands-ai/runtime:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - openhands_workspace:/opt/workspace
