@@ -21,12 +21,14 @@ services:
       BROWSER_WEB_URL: http://chrome:9222
       DATA_DIR: /data
       # Your public URL — used for auth callbacks (e.g. https://karakeep.yourdomain.com)
-      NEXTAUTH_URL: REPLACE_WITH_YOUR_URL
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       # Generate with: openssl rand -hex 32
-      NEXTAUTH_SECRET: REPLACE_WITH_HEX_SECRET
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       # Must match MEILI_MASTER_KEY below — generate with: openssl rand -hex 32
-      MEILI_MASTER_KEY: REPLACE_WITH_HEX_SECRET
-      OPENAI_API_KEY: REPLACE_WITH_API_KEY   # optional — remove if not using AI summarization
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}   # optional — remove if not using AI summarization
+    env_file:
+      - .env
 
   chrome:
     image: gcr.io/zenika-hub/alpine-chrome:123
@@ -46,5 +48,5 @@ services:
       - ./meilisearch:/meili_data
     environment:
       # Must match MEILI_MASTER_KEY above
-      MEILI_MASTER_KEY: REPLACE_WITH_HEX_SECRET
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       MEILI_NO_ANALYTICS: true

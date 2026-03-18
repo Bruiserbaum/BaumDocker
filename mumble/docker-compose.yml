@@ -12,16 +12,17 @@ services:
       - ./data:/data
     environment:
       # SuperUser password — used to administer the server via Mumble client
-      # Change this before starting the server
-      MUMBLE_SUPERUSER_PASSWORD: REPLACE_WITH_SUPERUSER_PASSWORD
+      MUMBLE_SUPERUSER_PASSWORD: ${MUMBLE_SUPERUSER_PASSWORD}
       # Server name shown in the public server list and client browser
-      MUMBLE_CONFIG_SERVERNAME: My Mumble Server
+      MUMBLE_CONFIG_SERVERNAME: ${MUMBLE_CONFIG_SERVERNAME}
       # Welcome message shown to users when they connect
-      MUMBLE_CONFIG_WELCOMETEXT: Welcome to the server.
+      MUMBLE_CONFIG_WELCOMETEXT: ${MUMBLE_CONFIG_WELCOMETEXT}
       # Maximum simultaneous users (0 = unlimited)
-      MUMBLE_CONFIG_USERS: 50
+      MUMBLE_CONFIG_USERS: ${MUMBLE_CONFIG_USERS}
       # Server bandwidth limit per user in bits/second (default: 72000 = 72 kbps)
-      MUMBLE_CONFIG_BANDWIDTH: 72000
+      MUMBLE_CONFIG_BANDWIDTH: ${MUMBLE_CONFIG_BANDWIDTH}
       # Set to true to register on the public Mumble server list
-      MUMBLE_CONFIG_REGISTERPUBLICSERVER: false
-      TZ: America/Chicago
+      MUMBLE_CONFIG_REGISTERPUBLICSERVER: ${MUMBLE_CONFIG_REGISTERPUBLICSERVER}
+      TZ: ${TZ}
+    env_file:
+      - .env

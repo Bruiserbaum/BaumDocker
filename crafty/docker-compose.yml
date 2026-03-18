@@ -21,4 +21,6 @@ services:
       - ./data/config:/crafty/app/config
       - ./data/import:/crafty/import
     environment:
-      TZ: America/Chicago
+      TZ: ${TZ}
+    env_file:
+      - .env

@@ -10,11 +10,13 @@ services:
       # Calibre-Web config and database
       - ./config:/config
       # Your Calibre library — must contain a metadata.db file (created by Calibre desktop app)
-      - /path/to/your/calibre/library:/books
+      - ${BOOKS_PATH}:/books
     environment:
-      TZ: America/Chicago
+      TZ: ${TZ}
       # Run as your host user to avoid permission issues
-      PUID: 1000
-      PGID: 1000
+      PUID: ${PUID}
+      PGID: ${PGID}
       # Optional — enables the Calibre content server for OPDS and direct downloads
       DOCKER_MODS: linuxserver/mods:universal-calibre
+    env_file:
+      - .env

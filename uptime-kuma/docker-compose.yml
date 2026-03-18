@@ -10,4 +10,6 @@ services:
       # All monitors, settings, and history stored on host
       - ./data:/app/data
     environment:
-      TZ: America/Chicago
+      TZ: ${TZ}
+    env_file:
+      - .env
