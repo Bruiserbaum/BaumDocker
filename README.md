@@ -59,6 +59,26 @@ docker compose down -v
 
 ---
 
+## Deploying via Portainer
+
+Each stack can be deployed directly from this Git repository using Portainer's **Repository** stack option.
+
+1. In Portainer, go to **Stacks → Add stack → Repository**
+2. Fill in the fields:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bnuss/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `<stack-folder>/docker-compose.yml` (e.g. `immich/docker-compose.yml`) |
+
+3. Under **Environment variables**, add any `REPLACE_WITH_*` values required by that stack
+4. Click **Deploy the stack**
+
+> Portainer will pull the compose file directly from GitHub. Enable **Automatic updates** in the stack settings to re-deploy on every push.
+
+---
+
 ## License and Project Status
 
 This repository is a personal project shared publicly for learning, reference, portfolio, and experimentation purposes.
