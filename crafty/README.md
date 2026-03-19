@@ -73,6 +73,25 @@ Change the password immediately after logging in under **Config → Users**.
 5. Set memory allocation (RAM)
 6. Click **Create** and then **Start**
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `crafty/docker-compose.yml` |
+
+3. Under **Environment variables**, add `TZ`
+4. Click **Deploy the stack**
+
+> The random admin password is generated on first start. Retrieve it with:
+> ```bash
+> docker logs crafty 2>&1 | grep -i "password"
+> ```
+
 ## Adding More Servers
 
 Each server needs:

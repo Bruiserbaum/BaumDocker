@@ -59,6 +59,20 @@ Default credentials (change immediately):
 2. Enter your domain, set the forward host (container name or IP) and port
 3. On the **SSL** tab, request a Let's Encrypt certificate
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `nginx-proxy-manager/docker-compose.yml` |
+
+3. Under **Environment variables**, add `DB_ROOT_PASSWORD` and `DB_PASSWORD` (generate each with `openssl rand -hex 32`)
+4. Click **Deploy the stack**
+
 ## Recommended Network Setup
 
 For NPM to proxy to other Docker stacks, either:

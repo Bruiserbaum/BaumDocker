@@ -64,6 +64,22 @@ On first start, Immich will initialize the database and download ML models. This
 
 Navigate to `http://your-server-ip:2283` and create your admin account.
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `immich/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example`
+4. Click **Deploy the stack**
+
+> Create the host directories for photos, model cache, and postgres data before deploying — Docker will not create them automatically on all systems.
+
 ## Mobile App
 
 Install the Immich app on iOS or Android. Point it at `http://your-server-ip:2283` (or your external URL if behind a reverse proxy).

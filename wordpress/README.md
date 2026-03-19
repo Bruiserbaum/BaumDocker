@@ -50,6 +50,20 @@ docker compose up -d
 
 Navigate to `http://your-server-ip:8080` and follow the WordPress setup wizard to set your site title, admin username, and admin password.
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `wordpress/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example`
+4. Click **Deploy the stack**
+
 ## Backup
 
 ```bash

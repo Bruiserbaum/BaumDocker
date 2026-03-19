@@ -54,6 +54,20 @@ First start initializes the database and creates the admin account automatically
 
 `http://your-server-ip:8080`
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `nextcloud/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example`
+4. Click **Deploy the stack**
+
 ## Behind a Reverse Proxy
 
 If using Nginx Proxy Manager or a Traefik, add your proxy's hostname to `NEXTCLOUD_TRUSTED_DOMAINS` and set the overwrite URL in Nextcloud's `config.php`:

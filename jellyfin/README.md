@@ -62,6 +62,22 @@ Navigate to `http://your-server-ip:8096`
 
 The first-run wizard walks you through creating an admin account and adding your media libraries. When adding libraries, use the container-side paths (`/movies`, `/tv`, `/music`).
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `jellyfin/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example` (PUID, PGID, TZ, media paths)
+4. Click **Deploy the stack**
+
+> Media library paths are set via environment variables in `.env.example`. Set them to the absolute host paths where your movies, TV, and music live.
+
 ## Hardware Transcoding
 
 Jellyfin supports hardware-accelerated transcoding with no license required.

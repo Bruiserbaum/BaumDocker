@@ -105,6 +105,27 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 - Scheduled n8n workflow queries Ollama with a system prompt for daily briefings
 - Webhook → n8n → AnythingLLM workspace query → return response to caller
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `ai-stack/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example`
+4. Click **Deploy the stack**
+
+> **Large image warning:** OpenHands is a large image and may cause a 504 timeout in Portainer. If this happens, pre-pull on the host first:
+> ```bash
+> docker pull ghcr.io/all-hands-ai/openhands:latest
+> docker pull ghcr.io/all-hands-ai/runtime:latest
+> ```
+> Then redeploy — Portainer will use the cached images.
+
 ## GPU Acceleration (optional)
 
 To enable NVIDIA GPU passthrough for Ollama, add to the `ollama` service:

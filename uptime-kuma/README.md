@@ -46,6 +46,22 @@ Click **Add New Monitor** and choose a type:
 | DNS | Domain resolution checks |
 | Docker Container | Monitor containers on the same host |
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `uptime-kuma/docker-compose.yml` |
+
+3. Under **Environment variables**, add `TZ`
+4. Click **Deploy the stack**
+
+> Create your admin account immediately on first visit — the setup page is unauthenticated until an account exists.
+
 ## Notifications
 
 Set up alerts under **Settings → Notifications** before adding monitors. Kuma supports Discord, Telegram, Slack, Gotify, ntfy, email (SMTP), PagerDuty, and 90+ more.

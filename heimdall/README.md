@@ -45,6 +45,20 @@ docker compose up -d
 - HTTP:  `http://your-server-ip`
 - HTTPS: `https://your-server-ip` (browser will warn about the self-signed cert — safe to accept on a local network)
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `heimdall/docker-compose.yml` |
+
+3. Under **Environment variables**, add `PUID`, `PGID`, and `TZ`
+4. Click **Deploy the stack**
+
 ## Adding Apps
 
 1. Open Heimdall in your browser

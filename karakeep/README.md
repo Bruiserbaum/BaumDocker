@@ -50,6 +50,22 @@ Navigate to `http://your-server-ip:3000` (or your `NEXTAUTH_URL`).
 
 Signups are disabled by default (`DISABLE_SIGNUPS: true`) — create your account on first launch before disabling signups, or temporarily set it to `false`.
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `karakeep/docker-compose.yml` |
+
+3. Under **Environment variables**, add `NEXTAUTH_SECRET`, `MEILI_MASTER_KEY`, `NEXTAUTH_URL`, and optionally `OPENAI_API_KEY`
+4. Click **Deploy the stack**
+
+> `MEILI_MASTER_KEY` must be the **same value** in both the `web` and `meilisearch` environment variables — set it once here and it applies to both.
+
 ## Data
 
 | Path | Contents |

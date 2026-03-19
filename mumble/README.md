@@ -58,6 +58,20 @@ In the Mumble client, connect with:
 
 From there you can create channels, set ACLs, register users, and configure the server.
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `mumble/docker-compose.yml` |
+
+3. Under **Environment variables**, add `MUMBLE_SUPERUSER_PASSWORD` and any other `MUMBLE_CONFIG_*` values you want to override
+4. Click **Deploy the stack**
+
 ## Firewall
 
 Open both TCP and UDP on port 64738:

@@ -54,6 +54,20 @@ Create your account on first visit. Set `SIGNUPS_ALLOWED=false` in `.env` and re
 
 In any Bitwarden client, go to **Settings → Server URL** and enter your Vaultwarden URL before logging in.
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `vaultwarden/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example`
+4. Click **Deploy the stack**
+
 ## Reverse Proxy
 
 Vaultwarden is designed to run behind a reverse proxy (nginx, Traefik, nginx-proxy-manager). Set `DOMAIN` to your external HTTPS URL — this is required for correct invite links, 2FA setup, and mobile sync.

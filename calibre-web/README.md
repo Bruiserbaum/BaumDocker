@@ -63,6 +63,20 @@ On first login, Calibre-Web will prompt for the database location. Enter:
 /books
 ```
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `calibre-web/docker-compose.yml` |
+
+3. Under **Environment variables**, add `PUID`, `PGID`, `TZ`, and `CALIBRE_LIBRARY_PATH` (absolute host path to your Calibre library folder)
+4. Click **Deploy the stack**
+
 ## OPDS (E-Reader Apps)
 
 The OPDS catalog URL for apps like KOReader, Librera, or Moon+ Reader:

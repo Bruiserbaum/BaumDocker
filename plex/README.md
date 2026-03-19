@@ -69,6 +69,22 @@ docker compose up -d
 
 Navigate to `http://your-server-ip:32400/web`
 
+## Deploying via Portainer
+
+1. Go to **Stacks → Add stack → Repository**
+2. Fill in:
+
+| Field | Value |
+|-------|-------|
+| Repository URL | `https://github.com/Bruiserbaum/BaumDocker` |
+| Repository reference | `refs/heads/master` |
+| Compose path | `plex/docker-compose.yml` |
+
+3. Under **Environment variables**, add every value from `.env.example` (PLEX_CLAIM, PUID, PGID, TZ, media paths)
+4. Click **Deploy the stack**
+
+> Get your claim token from **https://plex.tv/claim** — it expires in 4 minutes. Only needed on first deploy to link the server to your account.
+
 ## Networking
 
 This stack uses `network_mode: host` by default. This gives Plex full LAN visibility and enables automatic device discovery (GDM), DLNA, and Bonjour without manually exposing every UDP port.
