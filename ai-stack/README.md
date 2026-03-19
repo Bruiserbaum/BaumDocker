@@ -10,6 +10,7 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 | **LibreChat** | 3000 | Full-featured ChatGPT-style UI with multi-model support |
 | **AnythingLLM** | 3001 | RAG-enabled workspace chat with document uploads |
 | **n8n** | 5678 | Workflow automation — orchestrates Ollama and AnythingLLM via built-in nodes |
+| **OpenHands** | 3002 | AI coding agent — browses files, writes and runs code, uses Ollama as backend |
 | **MongoDB** | — (internal) | Database backend for LibreChat |
 
 ## Models pulled on first start
@@ -17,7 +18,7 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 Ollama pulls these automatically on container startup if not already present:
 
 - `qwen2.5:7b-instruct` — general instruction-following
-- `qwen2.5-coder:7b` — code generation
+- `qwen3-coder` — code generation (used by OpenHands by default)
 - `llama3.2:3b` — fast lightweight model
 
 Edit the `entrypoint` block in `docker-compose.yml` to add or swap models.
@@ -49,6 +50,14 @@ Each secret field must have a **unique** value — do not reuse the same string 
 
 Set `OPENAI_API_KEY` if you want OpenAI as a fallback model source, or leave it blank for a fully local setup.
 
+### 2. Start the stack
+
+```bash
+docker compose up -d
+```
+
+Ollama will pull models on first start — this may take several minutes depending on your connection and model sizes.
+
 ### 3. Create the LibreChat config
 
 LibreChat requires a config file at `/opt/librechat/librechat.yaml` on the host:
@@ -60,20 +69,12 @@ sudo touch /opt/librechat/librechat.yaml
 
 See the [LibreChat docs](https://www.librechat.ai/docs/configuration/librechat_yaml) for configuration options.
 
-### 4. Start the stack
-
-
-```bash
-docker compose up -d
-```
-
-Ollama will pull models on first start — this may take several minutes depending on your connection.
-
-### 5. Access the UIs
+### 4. Access the UIs
 
 - LibreChat: `http://your-server-ip:3000`
 - AnythingLLM: `http://your-server-ip:3001`
 - n8n: `http://your-server-ip:5678`
+- OpenHands: `http://your-server-ip:3002`
 
 ## n8n + Ollama + AnythingLLM Integration
 

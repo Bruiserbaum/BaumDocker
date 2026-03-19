@@ -10,7 +10,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 
 | Stack | Description |
 |-------|-------------|
-| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + OpenClaw â€” fully local AI with optional OpenAI fallback |
+| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n + OpenHands â€” fully local AI with optional OpenAI fallback |
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
 | [immich](immich/) | Self-hosted photo and video backup â€” Google Photos replacement with data stored on host drive |
 | [heimdall](heimdall/) | Home lab application dashboard â€” pin all your services in one place with live status tiles |
