@@ -28,8 +28,26 @@ Edit `.env` and fill in:
 |----------|-------------|
 | `DATA_FOLDER` | Absolute host path to store vault data |
 | `DOMAIN` | Full URL clients use to reach Vaultwarden (e.g. `https://vault.yourdomain.com`) |
-| `ADMIN_TOKEN` | Admin panel password — generate with `openssl rand -base64 48` |
+| `ADMIN_TOKEN` | Admin panel token — must be an Argon2 PHC hash (see below) |
 | `SIGNUPS_ALLOWED` | `true` to allow new registrations, `false` to lock down after setup |
+
+#### Generating the ADMIN_TOKEN hash
+
+Vaultwarden expects a pre-hashed **Argon2 PHC string** for `ADMIN_TOKEN`, not a plain-text password. Use the built-in hash command to generate it:
+
+```bash
+docker exec -it <vaultwarden-container-name> /vaultwarden hash
+```
+
+Enter your desired admin password when prompted. Copy the resulting `$argon2id$...` string and use that as the value of `ADMIN_TOKEN` in your `.env` or Portainer environment variables.
+
+If the container isn't running yet, you can generate the hash with the `argon2` CLI tool on your host instead:
+
+```bash
+echo -n 'your-password' | argon2 "$(openssl rand -base64 32)" -id -t 3 -m 16 -p 4 -l 32 -e
+```
+
+This keeps the raw password out of your deployment files entirely.
 
 ### 2. Create the data directory
 
