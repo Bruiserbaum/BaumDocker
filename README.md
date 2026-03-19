@@ -88,6 +88,24 @@ Each stack can be deployed directly from this Git repository using Portainer's *
 
 ---
 
+## BaumLab Ecosystem
+
+BaumDocker is part of a broader set of self-hosted homelab tools built under the BaumLab umbrella. Each project is independent but designed to work well alongside the stacks in this repo.
+
+| Project | Description |
+|---------|-------------|
+| **[BaumDocker](https://github.com/Bruiserbaum/BaumDocker)** | *(this repo)* Docker Compose stacks for home lab services |
+| **[BaumLabBackup](https://github.com/Bruiserbaum/BaumLabBackup)** | Self-hosted Docker backup manager — schedule backups of container volumes and databases to Backblaze B2, NAS, SFTP, or local storage. Web UI with TOTP/MFA, job history, and log viewer |
+| **[BaumOllamaCoding](https://github.com/Bruiserbaum/BaumOllamaCoding)** | VS Code extension for local AI coding — streaming chat, multi-model support, file/image attachments, GitHub integration, and an OpenHands agent launcher |
+
+### How they fit together
+
+- Deploy your services with **BaumDocker** stacks (Ollama, Nextcloud, Immich, Vaultwarden, etc.)
+- Protect your data with **BaumLabBackup** — point it at the running containers and it handles stopping, dumping, archiving, and uploading on a schedule
+- Use **BaumOllamaCoding** in VS Code to chat with the Ollama instance from your ai-stack, or launch an OpenHands agent to work on your codebase
+
+---
+
 ## License and Project Status
 
 This repository is a personal project shared publicly for learning, reference, portfolio, and experimentation purposes.
