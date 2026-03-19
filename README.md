@@ -24,6 +24,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [jellyfin](jellyfin/) | Free open-source media server â€” no account or Plex Pass required, full hardware transcode support |
 | [mumble](mumble/) | Self-hosted low-latency voice chat server â€” no accounts or subscriptions required |
 | [vaultwarden](vaultwarden/) | Lightweight self-hosted Bitwarden-compatible password manager â€” works with all official Bitwarden clients |
+| [mailcow](mailcow/) | Full self-hosted email server â€” Postfix, Dovecot, Rspamd, ClamAV, SOGo webmail, and automatic SSL in one stack |
 
 ---
 
