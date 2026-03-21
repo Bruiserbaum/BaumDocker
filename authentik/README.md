@@ -60,15 +60,46 @@ After setup, the main admin panel is at `http://<your-server-ip>:9100`.
 
 ## Updating
 
-Authentik requires coordinated version upgrades — do not skip major versions.
+> **⚠ Do not skip major version series.** Jumping directly from e.g. `2024.12.x` to `2026.2.x` will cause gunicorn to fail at startup because the database migration chain is broken. You must upgrade through each year's release series.
 
-1. Update `AUTHENTIK_TAG` in `.env` to the new version
-2. Pull the new images: `docker compose pull`
-3. Restart: `docker compose up -d`
+### Safe upgrade path (example: 2024.12.x → 2026.2.1)
 
-Authentik will automatically run any required database migrations on startup.
+Run each step fully before moving to the next — wait until containers are healthy:
 
-Check the [upgrade notes](https://docs.goauthentik.io/docs/releases) before upgrading across multiple versions.
+```bash
+# Step 1 — upgrade to mid-2025
+# In .env: AUTHENTIK_TAG=2025.2.4
+docker compose pull && docker compose up -d
+# Wait for: docker compose logs server --follow  (look for "startup complete")
+
+# Step 2 — upgrade to late-2025
+# In .env: AUTHENTIK_TAG=2025.6.4
+docker compose pull && docker compose up -d
+# Wait for healthy
+
+# Step 3 — upgrade to target
+# In .env: AUTHENTIK_TAG=2026.2.1
+docker compose pull && docker compose up -d
+```
+
+### If gunicorn failed after a bad jump
+
+Roll back to your last working tag, let it start cleanly, then follow the step-by-step path above:
+
+```bash
+# In .env, set AUTHENTIK_TAG back to your last working version
+docker compose up -d
+```
+
+### General update steps (within same major series)
+
+1. Update `AUTHENTIK_TAG` in `.env`
+2. `docker compose pull`
+3. `docker compose up -d`
+
+Authentik runs database migrations automatically on startup.
+
+Check the [upgrade notes](https://docs.goauthentik.io/docs/releases) before upgrading.
 
 ## Reverse Proxy
 
