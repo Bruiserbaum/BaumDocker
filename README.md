@@ -11,6 +11,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | Stack | Description |
 |-------|-------------|
 | [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n + OpenHands â€” fully local AI with optional OpenAI fallback |
+| [authentik](authentik/) | Open-source identity provider and SSO â€” OAuth2/OIDC, SAML, MFA, and forward auth for all your services |
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
 | [immich](immich/) | Self-hosted photo and video backup â€” Google Photos replacement with data stored on host drive |
 | [heimdall](heimdall/) | Home lab application dashboard â€” pin all your services in one place with live status tiles |
