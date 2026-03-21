@@ -32,7 +32,7 @@ Fill in the required values:
 |----------|----------------|
 | `AUTHENTIK_SECRET_KEY` | `openssl rand -hex 32` |
 | `PG_PASS` | `openssl rand -hex 32` |
-| `AUTHENTIK_TAG` | Check [releases](https://github.com/goauthentik/authentik/releases) for the latest |
+| `AUTHENTIK_TAG` | Defaults to `latest`. Pin to a specific version if needed (e.g. `2026.2.1`) |
 
 ### 2. Create local directories
 
