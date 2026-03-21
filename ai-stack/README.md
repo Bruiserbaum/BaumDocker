@@ -127,6 +127,28 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 > ```
 > Then redeploy — Portainer will use the cached images.
 
+## Authentik SSO for LibreChat (Optional)
+
+LibreChat supports OpenID Connect login. To enable SSO via Authentik:
+
+1. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+2. Set the redirect URI to: `http://your-server-ip:3000/oauth/openid/callback`
+3. Copy the Client ID and Client Secret.
+4. Uncomment and fill in the `LIBRECHAT_OPENID_*` variables in `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `LIBRECHAT_OPENID_ISSUER` | Authentik provider URL — `https://auth.yourdomain.com/application/o/<app-slug>/` |
+| `LIBRECHAT_OPENID_CLIENT_ID` | From the Authentik application |
+| `LIBRECHAT_OPENID_CLIENT_SECRET` | From the Authentik application |
+| `LIBRECHAT_OPENID_SCOPE` | `openid profile email` |
+| `LIBRECHAT_OPENID_CALLBACK_URL` | `/oauth/openid/callback` |
+| `LIBRECHAT_OPENID_BUTTON_LABEL` | Label for the login button (default: `Login with Authentik`) |
+
+5. Uncomment the matching `OPENID_*` lines in `docker-compose.yml` under the `librechat` service and restart.
+
+> To require SSO-only login, also set `ALLOW_REGISTRATION: false` and `ALLOW_EMAIL_LOGIN: false` in the `librechat` environment block.
+
 ## GPU Acceleration (optional)
 
 To enable NVIDIA GPU passthrough for Ollama, add to the `ollama` service:

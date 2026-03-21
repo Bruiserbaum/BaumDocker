@@ -123,6 +123,28 @@ Enable remote access under **Dashboard → Networking**. For direct connections 
 | Mobile apps | Free | Free (some limits) |
 | Remote access | Self-managed | Via plex.tv relay |
 
+## Authentik SSO (Optional)
+
+Jellyfin does not support OIDC natively via environment variables. SSO requires installing the **SSO-Auth** plugin from the Jellyfin Plugin Catalog.
+
+### Setup
+
+1. In Jellyfin, go to **Dashboard → Plugins → Catalog** and install **SSO-Auth**. Restart Jellyfin after install.
+2. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+3. Set the redirect URI to: `https://jellyfin.yourdomain.com/sso/OID/redirect/<provider-name>`
+4. In Jellyfin, go to **Dashboard → Plugins → SSO-Auth** and add a new OID provider:
+
+| Field | Value |
+|-------|-------|
+| Name | Any label (used in the redirect URL above) |
+| OID Endpoint | `https://auth.yourdomain.com/application/o/<app-slug>/` |
+| OpenID Client ID | From the Authentik application |
+| Secret | From the Authentik application |
+
+5. Enable **Enabled**, **Enable Authorization by Plugin**, and optionally **Enable All Folders** and **Enable All Channels**.
+
+> Jellyfin SSO requires your Jellyfin instance to be accessible over HTTPS with a valid cert. Self-signed certs may cause issues.
+
 ## Backup
 
 Back up `./config` — it contains your database, user accounts, watched history, and all metadata. Your media files should be backed up separately.

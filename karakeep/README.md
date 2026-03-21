@@ -66,6 +66,24 @@ Signups are disabled by default (`DISABLE_SIGNUPS: true`) — create your accoun
 
 > `MEILI_MASTER_KEY` must be the **same value** in both the `web` and `meilisearch` environment variables — set it once here and it applies to both.
 
+## Authentik SSO (Optional)
+
+KaraKeep uses NextAuth and supports a custom OIDC provider. To enable SSO via Authentik:
+
+1. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+2. Set the redirect URI to: `https://karakeep.yourdomain.com/api/auth/callback/custom_oidc`
+3. Copy the Client ID and Client Secret.
+4. Uncomment and fill in the `OAUTH_OIDC_*` variables in `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `OAUTH_OIDC_ISSUER` | Authentik provider URL — `https://auth.yourdomain.com/application/o/<app-slug>/` |
+| `OAUTH_OIDC_CLIENT_ID` | From the Authentik application |
+| `OAUTH_OIDC_CLIENT_SECRET` | From the Authentik application |
+| `OAUTH_OIDC_NAME` | Display name for the login button (default: `Authentik`) |
+
+Then uncomment the matching `OAUTH_OIDC_*` lines in `docker-compose.yml` and restart.
+
 ## Data
 
 | Path | Contents |

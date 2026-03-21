@@ -90,6 +90,27 @@ In any Bitwarden client, go to **Settings → Server URL** and enter your Vaultw
 
 Vaultwarden is designed to run behind a reverse proxy (nginx, Traefik, nginx-proxy-manager). Set `DOMAIN` to your external HTTPS URL — this is required for correct invite links, 2FA setup, and mobile sync.
 
+## Authentik SSO (Optional)
+
+Vaultwarden supports OIDC login as of version **1.32.0**. To enable SSO via Authentik:
+
+1. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+2. Set the redirect URI to: `https://vault.yourdomain.com/identity/connect/oidc-signin`
+3. Copy the Client ID and Client Secret.
+4. Uncomment and fill in the `SSO_*` variables in `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `SSO_ENABLED` | Set to `true` to enable OIDC login |
+| `SSO_ONLY` | Set to `true` to disable password login and require SSO |
+| `SSO_AUTHORITY` | Authentik provider URL — `https://auth.yourdomain.com/application/o/<app-slug>/` |
+| `SSO_CLIENT_ID` | From the Authentik application |
+| `SSO_CLIENT_SECRET` | From the Authentik application |
+
+Then uncomment the matching `SSO_*` lines in `docker-compose.yml` and restart.
+
+> **Note:** SSO users are separate from local accounts. Existing accounts will not be merged automatically.
+
 ## SMTP / Email
 
 Email is optional but recommended for password hints and organization invites. Uncomment and fill in the `SMTP_*` variables in `.env`, then restart.

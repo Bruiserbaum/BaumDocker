@@ -23,6 +23,12 @@ services:
       # SMTP_SECURITY: ${SMTP_SECURITY:-starttls}
       # SMTP_USERNAME: ${SMTP_USERNAME}
       # SMTP_PASSWORD: ${SMTP_PASSWORD}
+      # Authentik SSO — uncomment and fill in .env to enable (requires Vaultwarden 1.32.0+)
+      # SSO_ENABLED: ${SSO_ENABLED:-false}
+      # SSO_ONLY: ${SSO_ONLY:-false}
+      # SSO_AUTHORITY: ${SSO_AUTHORITY}
+      # SSO_CLIENT_ID: ${SSO_CLIENT_ID}
+      # SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET}
     env_file:
       - path: .env
         required: false

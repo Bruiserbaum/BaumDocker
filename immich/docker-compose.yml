@@ -26,6 +26,13 @@ services:
       REDIS_HOSTNAME: redis
       # Uncomment if accessing via a reverse proxy or external URL
       # IMMICH_SERVER_URL: ${IMMICH_SERVER_URL}
+      # Authentik SSO — uncomment and fill in .env to enable
+      # OAUTH_ENABLED: ${OAUTH_ENABLED:-false}
+      # OAUTH_ISSUER_URL: ${OAUTH_ISSUER_URL}
+      # OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      # OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      # OAUTH_BUTTON_TEXT: ${OAUTH_BUTTON_TEXT:-Login with Authentik}
+      # OAUTH_AUTO_REGISTER: ${OAUTH_AUTO_REGISTER:-true}
     env_file:
       - path: .env
         required: false

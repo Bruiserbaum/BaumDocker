@@ -111,6 +111,26 @@ Since all data is on host paths, your backup strategy is straightforward:
 docker exec immich-postgres pg_dumpall -U immich > immich-backup.sql
 ```
 
+## Authentik SSO (Optional)
+
+Immich supports OAuth2/OIDC login natively. To enable SSO via Authentik:
+
+1. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+2. Set the redirect URI to: `https://photos.yourdomain.com/auth/login/callback`
+3. Copy the Client ID and Client Secret.
+4. Uncomment and fill in the `OAUTH_*` variables in `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `OAUTH_ENABLED` | Set to `true` to enable SSO |
+| `OAUTH_ISSUER_URL` | Authentik provider URL — `https://auth.yourdomain.com/application/o/<app-slug>/` |
+| `OAUTH_CLIENT_ID` | From the Authentik application |
+| `OAUTH_CLIENT_SECRET` | From the Authentik application |
+| `OAUTH_BUTTON_TEXT` | Label for the login button (default: `Login with Authentik`) |
+| `OAUTH_AUTO_REGISTER` | `true` to auto-create Immich accounts for SSO users on first login |
+
+Then uncomment the matching `OAUTH_*` lines in `docker-compose.yml` and restart the stack.
+
 ## Reverse Proxy
 
 If placing Immich behind nginx or Traefik, set `IMMICH_SERVER_URL` in `.env` to your external URL and uncomment the relevant line in `docker-compose.yml`. Immich needs this for correct mobile app redirects and OAuth callbacks.

@@ -83,6 +83,28 @@ Or set via environment variable before first run:
 NEXTCLOUD_TRUSTED_DOMAINS=cloud.yourdomain.com
 ```
 
+## Authentik SSO (Optional)
+
+Nextcloud supports OIDC login via the **user_oidc** app (built by the Nextcloud team). There are no container-level env vars — configuration is done through the Nextcloud web UI after install.
+
+### Setup
+
+1. In Nextcloud, go to **Apps → Search** and install **OpenID Connect user backend**.
+2. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
+3. Set the redirect URI to: `https://cloud.yourdomain.com/apps/user_oidc/code`
+4. Back in Nextcloud, go to **Settings → OpenID Connect** and add a new provider:
+
+| Field | Value |
+|-------|-------|
+| Identifier | `Authentik` (display name) |
+| Client ID | From the Authentik application |
+| Client Secret | From the Authentik application |
+| Discovery Endpoint | `https://auth.yourdomain.com/application/o/<app-slug>/.well-known/openid-configuration` |
+
+5. Click **Register** and test login.
+
+> To require SSO only, disable local password login under **Settings → Administration → Security → Disable password login for local users**.
+
 ## Maintenance
 
 Run Nextcloud's background jobs on a cron schedule (recommended over the default AJAX mode):

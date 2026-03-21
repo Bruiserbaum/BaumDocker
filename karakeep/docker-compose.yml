@@ -27,6 +27,11 @@ services:
       # Must match MEILI_MASTER_KEY below — generate with: openssl rand -hex 32
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}   # optional — remove if not using AI summarization
+      # Authentik SSO — uncomment and fill in .env to enable OIDC login
+      # OAUTH_OIDC_ISSUER: ${OAUTH_OIDC_ISSUER}
+      # OAUTH_OIDC_CLIENT_ID: ${OAUTH_OIDC_CLIENT_ID}
+      # OAUTH_OIDC_CLIENT_SECRET: ${OAUTH_OIDC_CLIENT_SECRET}
+      # OAUTH_OIDC_NAME: ${OAUTH_OIDC_NAME:-Authentik}
     env_file:
       - path: .env
         required: false
