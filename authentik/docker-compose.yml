@@ -64,8 +64,8 @@ services:
       - ./media:/media
       - ./custom-templates:/templates
     ports:
-      - "${AUTHENTIK_HTTP_PORT:-9000}:9000"
-      - "${AUTHENTIK_HTTPS_PORT:-9443}:9443"
+      - "${AUTHENTIK_HTTP_PORT:-9100}:9000"
+      - "${AUTHENTIK_HTTPS_PORT:-9144}:9443"
     depends_on:
       postgresql:
         condition: service_healthy

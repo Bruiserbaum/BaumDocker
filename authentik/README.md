@@ -6,7 +6,7 @@ Open-source identity provider and SSO platform. Handles login, OAuth2/OIDC, SAML
 
 | Service | Description |
 |---------|-------------|
-| `server` | Web UI, API, and authentication flows — port 9000 (HTTP) / 9443 (HTTPS) |
+| `server` | Web UI, API, and authentication flows — port 9100 (HTTP) / 9144 (HTTPS) |
 | `worker` | Background tasks — token cleanup, email, outpost management |
 | `postgresql` | Primary database |
 | `redis` | Session cache and task queue |
@@ -15,8 +15,8 @@ Open-source identity provider and SSO platform. Handles login, OAuth2/OIDC, SAML
 
 | Port | Protocol | Purpose |
 |------|----------|---------|
-| `9000` | HTTP | Web UI and authentication (configure in `.env`) |
-| `9443` | HTTPS | HTTPS version of web UI (self-signed cert by default) |
+| `9100` | HTTP | Web UI and authentication (configure in `.env`) |
+| `9144` | HTTPS | HTTPS version of web UI (self-signed cert by default) |
 
 ## Setup
 
@@ -52,11 +52,11 @@ The first startup takes a few minutes as Authentik runs database migrations.
 
 ### 4. Complete initial setup
 
-Open `http://<your-server-ip>:9000/if/flow/initial-setup/` in your browser.
+Open `http://<your-server-ip>:9100/if/flow/initial-setup/` in your browser.
 
 Create your admin account (this is a one-time setup flow — the URL stops working once complete).
 
-After setup, the main admin panel is at `http://<your-server-ip>:9000`.
+After setup, the main admin panel is at `http://<your-server-ip>:9100`.
 
 ## Updating
 
@@ -72,7 +72,7 @@ Check the [upgrade notes](https://docs.goauthentik.io/docs/releases) before upgr
 
 ## Reverse Proxy
 
-Authentik is designed to sit behind a reverse proxy. When using [nginx-proxy-manager](../nginx-proxy-manager/) or a similar proxy, point it at port `9000`.
+Authentik is designed to sit behind a reverse proxy. When using [nginx-proxy-manager](../nginx-proxy-manager/) or a similar proxy, point it at port `9100`.
 
 Authentik also supports acting as a **forward auth** provider so other services can delegate authentication to it, even if they don't natively support OAuth2/OIDC.
 
