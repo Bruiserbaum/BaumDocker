@@ -62,13 +62,18 @@ services:
       REFRESH_TOKEN_SECRET: ${LIBRECHAT_REFRESH_TOKEN_SECRET}
       JWT_REFRESH_SECRET: ${LIBRECHAT_JWT_REFRESH_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      # Authentik SSO — uncomment and fill in .env to enable OIDC login
-      # OPENID_ISSUER: ${LIBRECHAT_OPENID_ISSUER}
-      # OPENID_CLIENT_ID: ${LIBRECHAT_OPENID_CLIENT_ID}
-      # OPENID_CLIENT_SECRET: ${LIBRECHAT_OPENID_CLIENT_SECRET}
-      # OPENID_SCOPE: ${LIBRECHAT_OPENID_SCOPE:-openid profile email}
-      # OPENID_CALLBACK_URL: ${LIBRECHAT_OPENID_CALLBACK_URL:-/oauth/openid/callback}
-      # OPENID_BUTTON_LABEL: ${LIBRECHAT_OPENID_BUTTON_LABEL:-Login with Authentik}
+      # Authentik SSO — set LIBRECHAT_OPENID_CLIENT_ID + SECRET in Portainer env vars to enable
+      # OPENID_ISSUER format: http://YOUR_AUTHENTIK_HOST:9100/application/o/librechat/.well-known/openid-configuration
+      OPENID_ISSUER: ${LIBRECHAT_OPENID_ISSUER}
+      OPENID_CLIENT_ID: ${LIBRECHAT_OPENID_CLIENT_ID}
+      OPENID_CLIENT_SECRET: ${LIBRECHAT_OPENID_CLIENT_SECRET}
+      OPENID_SESSION_SECRET: ${LIBRECHAT_OPENID_SESSION_SECRET}
+      OPENID_SCOPE: openid profile email
+      OPENID_CALLBACK_URL: /oauth/openid/callback
+      OPENID_BUTTON_LABEL: Login with Authentik
+      OPENID_IMAGE_URL: https://cdn.jsdelivr.net/gh/selfhst/icons/png/authentik.png
+      OPENID_GENERATE_NONCE: "true"
+      OPENID_USE_END_SESSION_ENDPOINT: "true"
     volumes:
       - /opt/librechat/librechat.yaml:/app/librechat.yaml:ro
       - librechat_uploads:/app/client/public/uploads

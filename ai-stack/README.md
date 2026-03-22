@@ -131,23 +131,35 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 
 LibreChat supports OpenID Connect login. To enable SSO via Authentik:
 
-1. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
-2. Set the redirect URI to: `http://your-server-ip:3000/oauth/openid/callback`
-3. Copy the Client ID and Client Secret.
-4. Uncomment and fill in the `LIBRECHAT_OPENID_*` variables in `.env`:
+### 1. Create the provider in Authentik
 
-| Variable | Description |
-|----------|-------------|
-| `LIBRECHAT_OPENID_ISSUER` | Authentik provider URL — `https://auth.yourdomain.com/application/o/<app-slug>/` |
-| `LIBRECHAT_OPENID_CLIENT_ID` | From the Authentik application |
-| `LIBRECHAT_OPENID_CLIENT_SECRET` | From the Authentik application |
-| `LIBRECHAT_OPENID_SCOPE` | `openid profile email` |
-| `LIBRECHAT_OPENID_CALLBACK_URL` | `/oauth/openid/callback` |
-| `LIBRECHAT_OPENID_BUTTON_LABEL` | Label for the login button (default: `Login with Authentik`) |
+- Admin → Applications → **Create with Wizard**
+- Name: `LibreChat`
+- Provider type: **OAuth2/OpenID Provider**
+- Redirect URI: `https://librechat.yourdomain.com/oauth/openid/callback`
+- Subject mode: **Based on the User's Email**
+- Note the **Client ID** and **Client Secret** from the provider details page
 
-5. Uncomment the matching `OPENID_*` lines in `docker-compose.yml` under the `librechat` service and restart.
+### 2. Set these environment variables in Portainer
 
-> To require SSO-only login, also set `ALLOW_REGISTRATION: false` and `ALLOW_EMAIL_LOGIN: false` in the `librechat` environment block.
+| Variable | Value |
+|----------|-------|
+| `LIBRECHAT_OPENID_ISSUER` | `http://YOUR_AUTHENTIK_HOST:9100/application/o/librechat/.well-known/openid-configuration` |
+| `LIBRECHAT_OPENID_CLIENT_ID` | Client ID from Authentik |
+| `LIBRECHAT_OPENID_CLIENT_SECRET` | Client Secret from Authentik |
+| `LIBRECHAT_OPENID_SESSION_SECRET` | Any random secret (`openssl rand -hex 32`) |
+
+The `docker-compose.yml` already has all required `OPENID_*` variables wired up — just set the four values above and redeploy.
+
+### 3. Redeploy LibreChat
+
+```bash
+docker compose up -d librechat
+```
+
+An **"Login with Authentik"** button will appear on the LibreChat login page. After logging in through Authentik, LibreChat creates a local account automatically.
+
+> To require SSO-only login (disable password login), set `ALLOW_EMAIL_LOGIN: false` in the `librechat` environment block.
 
 ## GPU Acceleration (optional)
 
