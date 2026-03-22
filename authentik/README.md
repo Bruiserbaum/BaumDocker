@@ -105,9 +105,55 @@ Check the [upgrade notes](https://docs.goauthentik.io/docs/releases) before upgr
 
 Authentik is designed to sit behind a reverse proxy. When using [nginx-proxy-manager](../nginx-proxy-manager/) or a similar proxy, point it at port `9100`.
 
-Authentik also supports acting as a **forward auth** provider so other services can delegate authentication to it, even if they don't natively support OAuth2/OIDC.
+## Forward Auth (unified SSO for all services)
 
-See the [Authentik proxy provider docs](https://docs.goauthentik.io/docs/providers/proxy/) for setup.
+Forward auth lets Nginx handle all authentication. Every request to a protected service is checked against Authentik first — if the user isn't logged in they're redirected to Authentik's login page, and once authenticated the request is forwarded with identity headers (`X-authentik-username`, etc.).
+
+This works for services on **any Docker host** as long as NPM can reach them by IP/hostname. Authentik only needs to be reachable by NPM.
+
+### Step 1 — Create a Proxy Provider in Authentik
+
+1. **Admin → Applications → Providers → Create → Proxy Provider**
+2. Name it (e.g. `BaumLab Forward Auth`)
+3. **Mode:** `Forward auth (single application)`
+4. **External host:** the public URL NPM exposes for that service (e.g. `https://baumlab.yourdomain.com`)
+5. Save
+
+### Step 2 — Create an Application
+
+1. **Admin → Applications → Create**
+2. Link the provider you just created
+3. Save
+
+### Step 3 — Add the app to the Embedded Outpost
+
+1. **Admin → Outposts → authentik Embedded Outpost → Edit**
+2. Move your new application to "Selected Applications"
+3. Save — the outpost reconfigures itself within ~30 seconds
+
+### Step 4 — Configure NPM
+
+In NPM, edit the proxy host for your service:
+
+1. Open the **Advanced** tab
+2. Paste the contents of [`snippets/npm-forward-auth.conf`](snippets/npm-forward-auth.conf)
+3. Replace both `http://YOUR_AUTHENTIK_HOST:9100` with the URL NPM uses to reach Authentik (LAN IP or hostname)
+4. Save
+
+### Multi-host Docker setup
+
+Services can be on different Docker hosts. NPM reaches them by LAN IP:port in the proxy host destination. Only the NPM Advanced tab snippet changes — the Authentik setup is the same regardless of where the service is hosted.
+
+### Header-based auto-login (BaumLab / BaumLabBackup)
+
+Once forward auth is active, Authentik injects `X-authentik-username` into every forwarded request. BaumLab and BaumLabBackup can read this header on page load to automatically issue a local session — the user never sees a login page.
+
+Enable in each app's `.env`:
+```env
+AUTHENTIK_HEADER_AUTH=true
+```
+
+See the BaumLab and BaumLabBackup READMEs for full details.
 
 ## Email (Optional)
 
