@@ -61,6 +61,7 @@ services:
       # AUTHENTIK_EMAIL__USE_TLS: ${EMAIL_USE_TLS:-true}
       # AUTHENTIK_EMAIL__FROM: ${EMAIL_FROM}
     volumes:
+      - data:/data
       - ./media:/media
       - ./custom-templates:/templates
     ports:
@@ -101,6 +102,7 @@ services:
       # AUTHENTIK_EMAIL__FROM: ${EMAIL_FROM}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - data:/data
       - ./media:/media
       - ./certs:/certs
       - ./custom-templates:/templates
@@ -118,6 +120,7 @@ services:
 volumes:
   postgres:
   redis:
+  data:
 
 networks:
   internal:
