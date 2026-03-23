@@ -138,12 +138,12 @@ services:
       LLM_MODEL: ${OPENHANDS_LLM_MODEL}
       LLM_BASE_URL: http://ollama:11434
       LLM_API_KEY: ollama
-      WORKSPACE_MOUNT_PATH: /opt/workspace
-      SANDBOX_VOLUMES: openhands_workspace:/opt/workspace:rw
+      # Host path shared with sandbox containers — must be an absolute host path, not a named volume
+      SANDBOX_VOLUMES: /opt/openhands/workspace:/opt/openhands/workspace:rw
       SANDBOX_RUNTIME_CONTAINER_IMAGE: ghcr.io/all-hands-ai/runtime:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - openhands_workspace:/opt/workspace
+      - /opt/openhands/workspace:/opt/openhands/workspace
       - openhands_state:/root/.openhands-state
 
 networks:
