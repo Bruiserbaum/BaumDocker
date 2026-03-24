@@ -52,8 +52,8 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017/LibreChat
       OLLAMA_BASE_URL: http://ollama:11434
-      ALLOW_EMAIL_LOGIN: true
-      ALLOW_REGISTRATION: false
+      ALLOW_EMAIL_LOGIN: ${LIBRECHAT_ALLOW_EMAIL_LOGIN:-true}
+      ALLOW_REGISTRATION: ${LIBRECHAT_ALLOW_REGISTRATION:-false}
       ALLOW_UNVERIFIED_EMAIL_LOGIN: true
       CONFIG_BYPASS_VALIDATION: false
       JWT_SECRET: ${LIBRECHAT_JWT_SECRET}
