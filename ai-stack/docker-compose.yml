@@ -151,7 +151,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/openhands/workspace:/opt/openhands/workspace
       # Host bind mount so state survives stack redeployments and volume pruning
-      - /opt/openhands/state:/root/.openhands-state
+      - /opt/openhands/state:/root/.openhands
 
 networks:
   ai_frontend:
