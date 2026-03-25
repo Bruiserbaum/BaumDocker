@@ -113,6 +113,28 @@ On first visit, OpenHands shows a provider setup wizard. Complete it once:
 
 > **Port binding note:** If OpenHands' port (3002) shows as unreachable after a redeploy, restart the container from Portainer (not a full stack redeploy). This re-establishes the Docker iptables NAT rule.
 
+### OpenHands runtime image versioning
+
+OpenHands spawns sandbox containers using a separate runtime image. The `openhands:latest` and `runtime:latest` tags can fall out of sync with each other, causing the runtime container to fail to start with an error like:
+
+```
+exec: "/openhands/micromamba/bin/micromamba": no such file or directory
+```
+
+The runtime image tag format is `{openhands-version}-nikolaik`. To find the correct tag:
+
+```bash
+docker run --rm --entrypoint="" ghcr.io/all-hands-ai/openhands:latest \
+  python3 -c "import openhands; print(openhands.__version__)"
+# e.g. 0.59.0 → use ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik
+```
+
+Set `SANDBOX_RUNTIME_CONTAINER_IMAGE` to the matching versioned tag (see Portainer section below). When upgrading OpenHands, update this value to match the new version.
+
+### host.docker.internal on Linux
+
+On Linux Docker Engine (not Docker Desktop), `host.docker.internal` does not resolve by default. OpenHands uses this hostname to communicate with its spawned runtime containers. The compose file includes `extra_hosts: host.docker.internal:host-gateway` to handle this automatically — no manual action needed, but if you replicate this setup outside of this compose file, include that entry.
+
 ## n8n + Ollama + AnythingLLM Integration
 
 n8n connects to both services over the internal `ai_backend` network using their container hostnames — no external URLs needed.
@@ -154,13 +176,21 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 | Repository reference | `refs/heads/master` |
 | Compose path | `ai-stack/docker-compose.yml` |
 
-3. Under **Environment variables**, add every value from `.env.example`
+3. Under **Environment variables**, add every value from `.env.example`, plus:
+
+| Variable | Value |
+|----------|-------|
+| `SANDBOX_RUNTIME_CONTAINER_IMAGE` | `ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik` (update to match OpenHands version) |
+
 4. Click **Deploy the stack**
 
 > **Large image warning:** OpenHands is a large image and may cause a 504 timeout in Portainer. If this happens, pre-pull on the host first:
 > ```bash
 > docker pull ghcr.io/all-hands-ai/openhands:latest
-> docker pull ghcr.io/all-hands-ai/runtime:latest
+> # Check version, then pull matching runtime:
+> docker run --rm --entrypoint="" ghcr.io/all-hands-ai/openhands:latest \
+>   python3 -c "import openhands; print(openhands.__version__)"
+> docker pull ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik
 > ```
 > Then redeploy — Portainer will use the cached images.
 
@@ -175,6 +205,7 @@ LibreChat supports OpenID Connect login. To enable SSO via Authentik:
 - Provider type: **OAuth2/OpenID Provider**
 - Redirect URI: `https://librechat.yourdomain.com/oauth/openid/callback`
 - Subject mode: **Based on the User's Email**
+- **Encryption Key: leave blank** — do not set an encryption key. If one is set, Authentik issues JWE-encrypted ID tokens that LibreChat cannot decrypt, causing a silent "unsupported operation" error on login.
 - Note the **Client ID** and **Client Secret** from the provider details page
 
 ### 2. Set these environment variables in Portainer
@@ -197,6 +228,17 @@ docker compose up -d librechat
 ```
 
 A **"Login with Authentik"** button will appear on the LibreChat login page.
+
+### Migrating an existing local account to SSO
+
+If a user was previously registered with a password (local provider) and now needs to log in via Authentik, LibreChat will block the login with "user was registered with 'local' provider". Update the account in MongoDB:
+
+```bash
+docker exec librechat-mongodb mongosh LibreChat --eval \
+  "db.users.updateOne({email: 'user@example.com'}, {\$set: {provider: 'openid', openidId: 'user@example.com'}})"
+```
+
+Replace `user@example.com` with the account's email. The `openidId` must match the `sub` claim from Authentik, which equals the email when Subject Mode is set to "Based on the User's Email".
 
 ## GPU Acceleration (optional)
 
