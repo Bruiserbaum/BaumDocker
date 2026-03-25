@@ -144,6 +144,8 @@ services:
       # Host path shared with sandbox containers — must be an absolute host path, not a named volume
       SANDBOX_VOLUMES: /opt/openhands/workspace:/opt/openhands/workspace:rw
       SANDBOX_RUNTIME_CONTAINER_IMAGE: ${SANDBOX_RUNTIME_CONTAINER_IMAGE:-ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/openhands/workspace:/opt/openhands/workspace
