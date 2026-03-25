@@ -18,8 +18,10 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 Ollama pulls these automatically on container startup if not already present:
 
 - `qwen2.5:7b-instruct` — general instruction-following
-- `qwen3-coder` — code generation (used by OpenHands by default)
+- `qwen3-coder:30b-a3b-q4_K_M` — code generation, 19GB, MoE architecture (3B active params) — used by OpenHands
 - `llama3.2:3b` — fast lightweight model
+
+> **Note:** `qwen3-coder` only comes in 30b and 480b variants — there is no 14b. The 30b MoE model runs efficiently despite its size because only ~3B parameters are active per token.
 
 Edit the `entrypoint` block in `docker-compose.yml` to add or swap models.
 
@@ -50,17 +52,20 @@ Each secret field must have a **unique** value — do not reuse the same string 
 
 Set `OPENAI_API_KEY` if you want OpenAI as a fallback model source, or leave it blank for a fully local setup.
 
-### 2. Start the stack
+### 2. Configure LibreChat login
 
-```bash
-docker compose up -d
-```
+By default, email login is enabled and registration is disabled. Control this with two env vars:
 
-Ollama will pull models on first start — this may take several minutes depending on your connection and model sizes.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LIBRECHAT_ALLOW_EMAIL_LOGIN` | `true` | Allow username/password login |
+| `LIBRECHAT_ALLOW_REGISTRATION` | `false` | Allow new users to self-register |
+
+Set both to `false` if using Authentik SSO (see below).
 
 ### 3. Create the LibreChat config
 
-LibreChat requires a config file at `/opt/librechat/librechat.yaml` on the host:
+LibreChat requires a config file at `/opt/librechat/librechat.yaml` on the **Docker host**:
 
 ```bash
 sudo mkdir -p /opt/librechat
@@ -69,12 +74,44 @@ sudo touch /opt/librechat/librechat.yaml
 
 See the [LibreChat docs](https://www.librechat.ai/docs/configuration/librechat_yaml) for configuration options.
 
-### 4. Access the UIs
+### 4. Create the OpenHands workspace directory
+
+OpenHands uses a host path for its workspace so that sandbox containers can access it. Create it before deploying:
+
+```bash
+sudo mkdir -p /opt/openhands/workspace
+```
+
+Docker will create this automatically on first run, but creating it manually avoids permission issues.
+
+### 5. Start the stack
+
+```bash
+docker compose up -d
+```
+
+Ollama will pull models on first start. `qwen3-coder:30b-a3b-q4_K_M` is ~19GB — allow 10–20 minutes depending on your connection.
+
+### 6. Access the UIs
 
 - LibreChat: `http://your-server-ip:3000`
 - AnythingLLM: `http://your-server-ip:3001`
 - n8n: `http://your-server-ip:5678`
 - OpenHands: `http://your-server-ip:3002`
+
+## OpenHands First-Time Setup
+
+On first visit, OpenHands shows a provider setup wizard. Complete it once:
+
+1. **LLM Provider** → select **Ollama**
+2. **Model** → `qwen3-coder:30b-a3b-q4_K_M`
+3. **Base URL** → `http://ollama:11434`
+4. **API Key** → `ollama` (required field — any non-empty value works with Ollama)
+5. Click **Save**
+
+> The `LLM_MODEL`, `LLM_BASE_URL`, and `LLM_API_KEY` env vars are set in the compose and configure the backend. The wizard configures the browser-side client and must be completed once per browser.
+
+> **Port binding note:** If OpenHands' port (3002) shows as unreachable after a redeploy, restart the container from Portainer (not a full stack redeploy). This re-establishes the Docker iptables NAT rule.
 
 ## n8n + Ollama + AnythingLLM Integration
 
@@ -148,8 +185,10 @@ LibreChat supports OpenID Connect login. To enable SSO via Authentik:
 | `LIBRECHAT_OPENID_CLIENT_ID` | Client ID from Authentik |
 | `LIBRECHAT_OPENID_CLIENT_SECRET` | Client Secret from Authentik |
 | `LIBRECHAT_OPENID_SESSION_SECRET` | Any random secret (`openssl rand -hex 32`) |
+| `LIBRECHAT_ALLOW_EMAIL_LOGIN` | `false` |
+| `LIBRECHAT_ALLOW_REGISTRATION` | `false` |
 
-The `docker-compose.yml` already has all required `OPENID_*` variables wired up — just set the four values above and redeploy.
+Then uncomment the `OPENID_*` block in `docker-compose.yml` under the `librechat` service and redeploy.
 
 ### 3. Redeploy LibreChat
 
@@ -157,9 +196,7 @@ The `docker-compose.yml` already has all required `OPENID_*` variables wired up 
 docker compose up -d librechat
 ```
 
-An **"Login with Authentik"** button will appear on the LibreChat login page. After logging in through Authentik, LibreChat creates a local account automatically.
-
-> To require SSO-only login (disable password login), set `ALLOW_EMAIL_LOGIN: false` in the `librechat` environment block.
+A **"Login with Authentik"** button will appear on the LibreChat login page.
 
 ## GPU Acceleration (optional)
 
