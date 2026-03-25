@@ -141,6 +141,7 @@ services:
       LLM_MODEL: ${OPENHANDS_LLM_MODEL}
       LLM_BASE_URL: http://ollama:11434
       LLM_API_KEY: ollama
+      GITHUB_TOKEN: ${OPENHANDS_GITHUB_TOKEN:-}
       # Host path shared with sandbox containers — must be an absolute host path, not a named volume
       SANDBOX_VOLUMES: /opt/openhands/workspace:/opt/openhands/workspace:rw
       SANDBOX_RUNTIME_CONTAINER_IMAGE: ${SANDBOX_RUNTIME_CONTAINER_IMAGE:-ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik}
@@ -149,7 +150,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/openhands/workspace:/opt/openhands/workspace
-      - openhands_state:/root/.openhands-state
+      # Host bind mount so state survives stack redeployments and volume pruning
+      - /opt/openhands/state:/root/.openhands-state
 
 networks:
   ai_frontend:
@@ -165,4 +167,3 @@ volumes:
   anythingllm_storage:
   n8n_data:
   openhands_workspace:
-  openhands_state:

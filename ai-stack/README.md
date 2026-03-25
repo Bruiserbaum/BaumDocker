@@ -74,15 +74,16 @@ sudo touch /opt/librechat/librechat.yaml
 
 See the [LibreChat docs](https://www.librechat.ai/docs/configuration/librechat_yaml) for configuration options.
 
-### 4. Create the OpenHands workspace directory
+### 4. Create the OpenHands directories
 
-OpenHands uses a host path for its workspace so that sandbox containers can access it. Create it before deploying:
+OpenHands uses host paths for its workspace and state so that settings and files survive stack redeployments:
 
 ```bash
 sudo mkdir -p /opt/openhands/workspace
+sudo mkdir -p /opt/openhands/state
 ```
 
-Docker will create this automatically on first run, but creating it manually avoids permission issues.
+Creating these manually avoids permission issues on first run.
 
 ### 5. Start the stack
 
@@ -181,6 +182,7 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 | Variable | Value |
 |----------|-------|
 | `SANDBOX_RUNTIME_CONTAINER_IMAGE` | `ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik` (update to match OpenHands version) |
+| `OPENHANDS_GITHUB_TOKEN` | Your GitHub personal access token (persists across redeploys — avoids re-entering in the UI) |
 
 4. Click **Deploy the stack**
 
