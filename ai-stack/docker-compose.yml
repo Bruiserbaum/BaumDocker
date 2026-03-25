@@ -71,8 +71,9 @@ services:
       OPENID_CLIENT_SECRET: ${LIBRECHAT_OPENID_CLIENT_SECRET}
       OPENID_SESSION_SECRET: ${LIBRECHAT_OPENID_SESSION_SECRET}
       OPENID_SCOPE: openid profile email
-      OPENID_CALLBACK_URL: /oauth/openid/callback
+      OPENID_CALLBACK_URL: ${LIBRECHAT_OPENID_CALLBACK_URL}
       OPENID_BUTTON_LABEL: Login with Authentik
+      TRUST_PROXY: "1"
       OPENID_IMAGE_URL: https://cdn.jsdelivr.net/gh/selfhst/icons/png/authentik.png
       OPENID_GENERATE_NONCE: "true"
       OPENID_USE_END_SESSION_ENDPOINT: "true"
