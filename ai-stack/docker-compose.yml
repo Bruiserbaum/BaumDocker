@@ -75,7 +75,7 @@ services:
       OPENID_BUTTON_LABEL: Login with Authentik
       TRUST_PROXY: "1"
       OPENID_IMAGE_URL: https://cdn.jsdelivr.net/gh/selfhst/icons/png/authentik.png
-      OPENID_GENERATE_NONCE: "true"
+      OPENID_GENERATE_NONCE: "false"
       OPENID_USE_END_SESSION_ENDPOINT: "true"
     volumes:
       - /opt/librechat/librechat.yaml:/app/librechat.yaml:ro
