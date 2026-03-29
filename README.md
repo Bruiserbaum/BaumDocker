@@ -10,7 +10,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 
 | Stack | Description |
 |-------|-------------|
-| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n + OpenHands — fully local AI with optional OpenAI fallback |
+| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n — fully local AI with optional OpenAI fallback |
 | [authentik](authentik/) | Open-source identity provider and SSO — OAuth2/OIDC, SAML, MFA, and forward auth for all your services |
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
 | [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive |
@@ -79,13 +79,6 @@ Each stack can be deployed directly from this Git repository using Portainer's *
 4. Click **Deploy the stack**
 
 > Portainer will pull the compose file directly from GitHub. Enable **Automatic updates** in the stack settings to re-deploy on every push.
-
-> **Note for large images (e.g. ai-stack):** Portainer may time out with a 504 error while pulling heavy images like OpenHands. If this happens, pre-pull the images manually over SSH before deploying:
-> ```bash
-> docker pull ghcr.io/all-hands-ai/openhands:latest
-> docker pull ghcr.io/all-hands-ai/runtime:latest
-> ```
-> Then redeploy the stack — Portainer will use the locally cached images and won't time out.
 
 ---
 
