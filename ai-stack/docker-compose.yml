@@ -24,6 +24,7 @@ services:
         ollama list | grep -q "qwen2.5:7b-instruct" || ollama pull qwen2.5:7b-instruct
         ollama list | grep -q "qwen3-coder:30b-a3b"   || ollama pull qwen3-coder:30b-a3b-q4_K_M
         ollama list | grep -q "llama3.2:3b"          || ollama pull llama3.2:3b
+        ollama list | grep -q "deepseek-coder:33b"   || ollama pull deepseek-coder:33b
         wait
 
   mongodb:
