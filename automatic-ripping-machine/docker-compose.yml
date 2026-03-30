@@ -6,10 +6,13 @@ services:
     privileged: true
     ports:
       - "8082:8080"
+    env_file:
+      - path: .env
+        required: false
     environment:
-      - ARM_UID=1000
-      - ARM_GID=1000
-      - TZ=America/New_York
+      - ARM_UID=${ARM_UID:-1000}
+      - ARM_GID=${ARM_GID:-1000}
+      - TZ=${TZ:-America/New_York}
     volumes:
       - /home/arm:/home/arm
       - /home/arm/logs:/home/arm/logs
@@ -18,6 +21,6 @@ services:
       - /home/arm/config:/etc/arm/config
     devices:
       # Add one entry per optical drive on your system.
-      # Run: lsscsi -g  to list available drives.
+      # Run setup.sh to detect drives, or manually: lsscsi -g
       - /dev/sr0:/dev/sr0
       # - /dev/sr1:/dev/sr1

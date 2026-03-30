@@ -15,6 +15,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [automatic-ripping-machine](automatic-ripping-machine/) | Automatic CD/DVD/Blu-ray ripper — detects disc insertion, rips, transcodes, and ejects with no interaction | [automatic-ripping-machine](https://github.com/automatic-ripping-machine/automatic-ripping-machine) · [fork](https://github.com/Bruiserbaum/automatic-ripping-machine) |
 | [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps | [janeczku/calibre-web](https://github.com/janeczku/calibre-web) |
 | [crafty](crafty/) | Web-based Minecraft server manager — create and run multiple Java and Bedrock servers | [crafty-controller/crafty-4](https://github.com/crafty-controller/crafty-4) |
+| [glusterfs](glusterfs/) | Distributed filesystem for Docker Swarm shared storage — single node to start, expandable to multi-node replica with `setup.sh` | [gluster/gluster-containers](https://github.com/gluster/gluster-containers) |
 | [heimdall](heimdall/) | Home lab application dashboard — pin all your services in one place with live status tiles | [linuxserver/Heimdall](https://github.com/linuxserver/Heimdall) |
 | [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive | [immich-app/immich](https://github.com/immich-app/immich) |
 | [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support | [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) |

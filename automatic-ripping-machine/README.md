@@ -13,40 +13,60 @@ Automatically detects when an optical disc (CD, DVD, Blu-ray) is inserted, rips 
 
 ## Setup
 
-### 1. Find your optical drive device
+### Option A — Automated (recommended)
 
 ```bash
-lsscsi -g
+chmod +x setup.sh && sudo ./setup.sh
 ```
 
-Add one `devices` entry per drive to `docker-compose.yml` (e.g. `/dev/sr0`, `/dev/sr1`). Only `/dev/sr0` is enabled by default.
+`setup.sh` handles everything in one pass:
+- Installs `lsscsi` if not present
+- Creates the `arm` user and group on the host
+- Creates `/home/arm/{logs,media,music,config}` with correct ownership
+- Prompts for your timezone and writes a `.env` file with the correct `ARM_UID`/`ARM_GID`
+- Detects optical drives and prints the exact `devices:` lines to add to `docker-compose.yml`
 
-### 2. Set your timezone and UID/GID
-
-Edit `docker-compose.yml`:
-
-```yaml
-environment:
-  - ARM_UID=1000   # match output of: id -u
-  - ARM_GID=1000   # match output of: id -g
-  - TZ=America/New_York
-```
-
-### 3. Create host directories
-
-```bash
-mkdir -p /home/arm/{logs,media,music,config}
-```
-
-### 4. Start
+After it runs, edit `docker-compose.yml` to add your detected drives, then:
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Access the UI
+### Option B — Manual
 
-`http://your-server-ip:8082`
+**1. Create the arm user and directories**
+
+```bash
+sudo useradd -m -d /home/arm -g arm arm
+sudo mkdir -p /home/arm/{logs,media,music,config}
+sudo chown -R arm:arm /home/arm
+```
+
+**2. Find your optical drive**
+
+```bash
+lsscsi -g
+```
+
+Add one `devices` entry per drive to `docker-compose.yml`.
+
+**3. Write a `.env` file**
+
+```bash
+echo "ARM_UID=$(id -u arm)" >> .env
+echo "ARM_GID=$(id -g arm)" >> .env
+echo "TZ=America/New_York"  >> .env
+```
+
+**4. Start**
+
+```bash
+docker compose up -d
+```
+
+### Access the UI
+
+`http://your-server-ip:8082` — default login: `admin` / `password`
 
 ## Volumes
 

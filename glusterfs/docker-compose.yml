@@ -1,0 +1,15 @@
+services:
+  glusterfs:
+    image: gluster/gluster-centos:latest
+    container_name: glusterfs
+    restart: unless-stopped
+    privileged: true
+    # host networking so other swarm nodes can reach glusterd by IP
+    network_mode: host
+    volumes:
+      # GlusterFS daemon config and metadata — persisted on host
+      - /etc/glusterfs:/etc/glusterfs:z
+      - /var/lib/glusterd:/var/lib/glusterd:z
+      - /var/log/glusterfs:/var/log/glusterfs:z
+      # Brick storage — change to a large/fast drive path
+      - ${BRICK_PATH:-/mnt/gluster-bricks}:/gluster/bricks
