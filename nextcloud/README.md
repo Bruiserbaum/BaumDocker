@@ -1,58 +1,56 @@
-# Nextcloud
+# Nextcloud AIO
 
-Self-hosted file sync and share — a Dropbox/Google Drive replacement. Includes PostgreSQL for the database and Redis for caching and file locking.
+Self-hosted file sync and share — an all-in-one Nextcloud deployment that manages its own containers (database, cache, backup, Talk, etc.) through a built-in admin interface. No manual database or Redis setup required.
+
+**Source:** [github.com/nextcloud/all-in-one](https://github.com/nextcloud/all-in-one)
 
 ## Services
 
 | Service | Port | Description |
 |---------|------|-------------|
-| **Nextcloud** | 8080 | Web UI and WebDAV endpoint |
-| **PostgreSQL** | — (internal) | Database |
-| **Redis** | — (internal) | Cache and file locking |
+| **AIO Admin UI** | 8080 | Initial setup and container management |
+| **AIO Admin UI (HTTPS)** | 8443 | Same UI over a valid certificate (after domain setup) |
+| **Nextcloud** | 80 / 443 | HTTP redirect and ACME validation / main HTTPS access |
 
-## Storage Layout
-
-| Path | Contents |
-|------|----------|
-| `./config` | Nextcloud app files, config, installed apps |
-| `./data` | User files — point to your large storage drive |
-| `./postgres` | PostgreSQL data files |
+All additional services (PostgreSQL, Redis, Collabora, Talk TURN server) are started and managed automatically by the AIO mastercontainer — they do not appear in the compose file.
 
 ## Setup
 
-### 1. Configure `.env`
-
-```bash
-cp .env.example .env
-```
-
-Fill in:
-
-| Variable | Description |
-|----------|-------------|
-| `POSTGRES_PASSWORD` | Database password — `openssl rand -hex 32` |
-| `NEXTCLOUD_ADMIN_PASSWORD` | Admin account password for first login |
-| `NEXTCLOUD_TRUSTED_DOMAINS` | Space-separated IPs/hostnames that can access Nextcloud |
-
-### 2. (Optional) Move data to a large drive
-
-Edit `docker-compose.yml` and change `./data` to an absolute path on your storage drive:
-
-```yaml
-- /mnt/your-drive/nextcloud/data:/var/www/html/data
-```
-
-### 3. Start
+### 1. Start
 
 ```bash
 docker compose up -d
 ```
 
-First start initializes the database and creates the admin account automatically (no web installer needed).
+### 2. Open the AIO admin interface
 
-### 4. Access
+Navigate to `http://your-server-ip:8080`. You will be shown a one-time passphrase — copy it.
 
-`http://your-server-ip:8080`
+### 3. Enter your domain
+
+AIO requires a publicly resolvable domain name pointing at your server. Enter it in the setup wizard. AIO will:
+- Request a Let's Encrypt certificate automatically
+- Start all required containers (database, Redis, Nextcloud, Talk, Collabora, ClamAV, Backup)
+
+### 4. Access Nextcloud
+
+Once setup completes, Nextcloud is available at `https://your-domain.com`.
+
+## Custom Data Directory
+
+To store Nextcloud files on a specific drive, uncomment the volume line and environment variable in `docker-compose.yml`:
+
+```yaml
+volumes:
+  - /mnt/your-drive/nextcloud:/mnt/ncdata
+
+environment:
+  NEXTCLOUD_DATADIR: /mnt/ncdata
+```
+
+## Behind a Reverse Proxy
+
+If you already have a reverse proxy (e.g. Nginx Proxy Manager), set `SKIP_DOMAIN_VALIDATION: true` and follow the [reverse proxy guide](https://github.com/nextcloud/all-in-one/blob/main/reverse-proxy.md) in the upstream docs. AIO provides example configs for Nginx, Caddy, Traefik, and NPM.
 
 ## Deploying via Portainer
 
@@ -65,56 +63,18 @@ First start initializes the database and creates the admin account automatically
 | Repository reference | `refs/heads/master` |
 | Compose path | `nextcloud/docker-compose.yml` |
 
-3. Under **Environment variables**, add every value from `.env.example`
-4. Click **Deploy the stack**
+3. Click **Deploy the stack**
+4. Open `http://your-server-ip:8080` to complete setup
 
-## Behind a Reverse Proxy
+> Note: AIO requires access to the Docker socket to manage its child containers. Portainer must allow this volume mount.
 
-If using Nginx Proxy Manager or a Traefik, add your proxy's hostname to `NEXTCLOUD_TRUSTED_DOMAINS` and set the overwrite URL in Nextcloud's `config.php`:
+## Volumes
 
-```php
-'overwrite.cli.url' => 'https://cloud.yourdomain.com',
-'overwriteprotocol' => 'https',
-```
-
-Or set via environment variable before first run:
-
-```env
-NEXTCLOUD_TRUSTED_DOMAINS=cloud.yourdomain.com
-```
-
-## Authentik SSO (Optional)
-
-Nextcloud supports OIDC login via the **user_oidc** app (built by the Nextcloud team). There are no container-level env vars — configuration is done through the Nextcloud web UI after install.
-
-### Setup
-
-1. In Nextcloud, go to **Apps → Search** and install **OpenID Connect user backend**.
-2. In Authentik, create an **OAuth2/OpenID Provider** and an **Application** for it.
-3. Set the redirect URI to: `https://cloud.yourdomain.com/apps/user_oidc/code`
-4. Back in Nextcloud, go to **Settings → OpenID Connect** and add a new provider:
-
-| Field | Value |
-|-------|-------|
-| Identifier | `Authentik` (display name) |
-| Client ID | From the Authentik application |
-| Client Secret | From the Authentik application |
-| Discovery Endpoint | `https://auth.yourdomain.com/application/o/<app-slug>/.well-known/openid-configuration` |
-
-5. Click **Register** and test login.
-
-> To require SSO only, disable local password login under **Settings → Administration → Security → Disable password login for local users**.
+| Volume | Purpose |
+|--------|---------|
+| `nextcloud_aio_mastercontainer` | AIO configuration and state — do not rename |
+| `/var/run/docker.sock` | Docker socket — AIO uses this to start/stop its child containers |
 
 ## Maintenance
 
-Run Nextcloud's background jobs on a cron schedule (recommended over the default AJAX mode):
-
-```bash
-docker exec -u www-data nextcloud php cron.php
-```
-
-Add to your host crontab to run every 5 minutes:
-
-```
-*/5 * * * * docker exec -u www-data nextcloud php cron.php
-```
+AIO includes a built-in backup system (Borg) and one-click update for all managed containers — accessible from the AIO admin interface on port 8080.

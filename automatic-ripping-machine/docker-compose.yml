@@ -1,0 +1,23 @@
+services:
+  arm:
+    image: automaticrippingmachine/automatic-ripping-machine:latest
+    container_name: arm
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "8082:8080"
+    environment:
+      - ARM_UID=1000
+      - ARM_GID=1000
+      - TZ=America/New_York
+    volumes:
+      - /home/arm:/home/arm
+      - /home/arm/logs:/home/arm/logs
+      - /home/arm/media:/home/arm/media
+      - /home/arm/music:/home/arm/music
+      - /home/arm/config:/etc/arm/config
+    devices:
+      # Add one entry per optical drive on your system.
+      # Run: lsscsi -g  to list available drives.
+      - /dev/sr0:/dev/sr0
+      # - /dev/sr1:/dev/sr1

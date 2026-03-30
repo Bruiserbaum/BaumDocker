@@ -1,49 +1,32 @@
+name: nextcloud-aio
+
 services:
-
-  nextcloud:
-    image: nextcloud:latest
-    container_name: nextcloud
-    restart: unless-stopped
-    depends_on:
-      - db
-      - redis
+  nextcloud-aio-mastercontainer:
+    image: ghcr.io/nextcloud-releases/all-in-one:latest
+    init: true
+    restart: always
+    container_name: nextcloud-aio-mastercontainer
+    volumes:
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # optional — override Nextcloud data directory location
+      # - /mnt/your-drive/nextcloud:/mnt/ncdata  # also set NEXTCLOUD_DATADIR below
+    network_mode: bridge
     ports:
-      - "8080:80"
-    volumes:
-      # Nextcloud app files (config, apps, themes)
-      - ./config:/var/www/html
-      # User data — point this at your large storage drive
-      - ./data:/var/www/html/data
+      - "80:80"
+      - "8080:8080"
+      - "8443:8443"
     environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
-      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      REDIS_HOST: redis
-      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS:-localhost}
-      # Optional — set on first run to skip the web installer
-      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
-    env_file:
-      - path: .env
-        required: false
+      # optional — store Nextcloud data on a specific drive
+      # NEXTCLOUD_DATADIR: /mnt/ncdata
+      # optional — skip the domain check (use if behind a reverse proxy without a domain)
+      # SKIP_DOMAIN_VALIDATION: true
+      # optional — max upload size
+      # PHP_UPLOAD_LIMIT: 10G
+      # optional — PHP memory limit
+      # PHP_MEMORY_LIMIT: 512M
+      pass: ""  # required placeholder — do not remove
 
-  db:
-    image: postgres:16-alpine
-    container_name: nextcloud-db
-    restart: unless-stopped
-    volumes:
-      - ./postgres:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-nextcloud}
-      POSTGRES_USER: ${POSTGRES_USER:-nextcloud}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    env_file:
-      - path: .env
-        required: false
-
-  redis:
-    image: redis:7-alpine
-    container_name: nextcloud-redis
-    restart: unless-stopped
-    command: redis-server --save 60 1 --loglevel warning
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer

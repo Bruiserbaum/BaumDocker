@@ -8,24 +8,25 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 
 ## Stacks
 
-| Stack | Description |
-|-------|-------------|
-| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n — fully local AI with optional OpenAI fallback |
-| [authentik](authentik/) | Open-source identity provider and SSO — OAuth2/OIDC, SAML, MFA, and forward auth for all your services |
-| [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization |
-| [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive |
-| [heimdall](heimdall/) | Home lab application dashboard — pin all your services in one place with live status tiles |
-| [nextcloud](nextcloud/) | Self-hosted file sync and share — Dropbox/Google Drive replacement with PostgreSQL and Redis |
-| [nginx-proxy-manager](nginx-proxy-manager/) | Reverse proxy with web UI and automatic Let's Encrypt SSL — no config files needed |
-| [wordpress](wordpress/) | Self-hosted WordPress with MariaDB and host-path storage for plugins, themes, and uploads |
-| [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps |
-| [crafty](crafty/) | Web-based Minecraft server manager — create and run multiple Java and Bedrock servers |
-| [uptime-kuma](uptime-kuma/) | Self-hosted uptime monitor with status pages and 90+ alert integrations |
-| [plex](plex/) | Media server for movies, TV, and music — streams to any device with hardware transcode support |
-| [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support |
-| [mumble](mumble/) | Self-hosted low-latency voice chat server — no accounts or subscriptions required |
-| [vaultwarden](vaultwarden/) | Lightweight self-hosted Bitwarden-compatible password manager — works with all official Bitwarden clients |
-| [mailcow](mailcow/) | Full self-hosted email server — Postfix, Dovecot, Rspamd, ClamAV, SOGo webmail, and automatic SSL in one stack |
+| Stack | Description | Source |
+|-------|-------------|--------|
+| [ai-stack](ai-stack/) | Ollama + LibreChat + AnythingLLM + n8n — fully local AI with optional OpenAI fallback | [Ollama](https://github.com/ollama/ollama) · [LibreChat](https://github.com/danny-avila/LibreChat) · [AnythingLLM](https://github.com/Mintplex-Labs/anything-llm) · [n8n](https://github.com/n8n-io/n8n) |
+| [authentik](authentik/) | Open-source identity provider and SSO — OAuth2/OIDC, SAML, MFA, and forward auth for all your services | [goauthentik/authentik](https://github.com/goauthentik/authentik) |
+| [automatic-ripping-machine](automatic-ripping-machine/) | Automatic CD/DVD/Blu-ray ripper — detects disc insertion, rips, transcodes, and ejects with no interaction | [automatic-ripping-machine](https://github.com/automatic-ripping-machine/automatic-ripping-machine) · [fork](https://github.com/Bruiserbaum/automatic-ripping-machine) |
+| [calibre-web](calibre-web/) | Web UI for your Calibre ebook library with OPDS support for e-reader apps | [janeczku/calibre-web](https://github.com/janeczku/calibre-web) |
+| [crafty](crafty/) | Web-based Minecraft server manager — create and run multiple Java and Bedrock servers | [crafty-controller/crafty-4](https://github.com/crafty-controller/crafty-4) |
+| [heimdall](heimdall/) | Home lab application dashboard — pin all your services in one place with live status tiles | [linuxserver/Heimdall](https://github.com/linuxserver/Heimdall) |
+| [immich](immich/) | Self-hosted photo and video backup — Google Photos replacement with data stored on host drive | [immich-app/immich](https://github.com/immich-app/immich) |
+| [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support | [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) |
+| [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization | [karakeep-app/karakeep](https://github.com/karakeep-app/karakeep) |
+| [mailcow](mailcow/) | Full self-hosted email server — Postfix, Dovecot, Rspamd, ClamAV, SOGo webmail, and automatic SSL in one stack | [mailcow/mailcow-dockerized](https://github.com/mailcow/mailcow-dockerized) |
+| [mumble](mumble/) | Self-hosted low-latency voice chat server — no accounts or subscriptions required | [mumble-voip/mumble](https://github.com/mumble-voip/mumble) |
+| [nextcloud](nextcloud/) | Self-hosted file sync and share — all-in-one deployment with automatic database, cache, backup, and Talk setup | [nextcloud/all-in-one](https://github.com/nextcloud/all-in-one) |
+| [nginx-proxy-manager](nginx-proxy-manager/) | Reverse proxy with web UI and automatic Let's Encrypt SSL — no config files needed | [NginxProxyManager/nginx-proxy-manager](https://github.com/NginxProxyManager/nginx-proxy-manager) |
+| [plex](plex/) | Media server for movies, TV, and music — streams to any device with hardware transcode support | [plexinc/pms-docker](https://github.com/plexinc/pms-docker) |
+| [uptime-kuma](uptime-kuma/) | Self-hosted uptime monitor with status pages and 90+ alert integrations | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) |
+| [vaultwarden](vaultwarden/) | Lightweight self-hosted Bitwarden-compatible password manager — works with all official Bitwarden clients | [dani-garcia/vaultwarden](https://github.com/dani-garcia/vaultwarden) |
+| [wordpress](wordpress/) | Self-hosted WordPress with MariaDB and host-path storage for plugins, themes, and uploads | [docker-library/wordpress](https://github.com/docker-library/wordpress) |
 
 ---
 
@@ -54,7 +55,7 @@ To stop:
 docker compose down
 ```
 
-To stop and remove volumes (âš  deletes all data):
+To stop and remove volumes (⚠ deletes all data):
 
 ```bash
 docker compose down -v
