@@ -10,7 +10,6 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 | **LibreChat** | 3000 | Full-featured ChatGPT-style UI with multi-model support |
 | **AnythingLLM** | 3001 | RAG-enabled workspace chat with document uploads |
 | **n8n** | 5678 | Workflow automation — orchestrates Ollama and AnythingLLM via built-in nodes |
-| **OpenHands** | 3002 | AI coding agent — browses files, writes and runs code, uses Ollama as backend |
 | **MongoDB** | — (internal) | Database backend for LibreChat |
 
 ## Models pulled on first start
@@ -18,10 +17,7 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 Ollama pulls these automatically on container startup if not already present:
 
 - `qwen2.5:7b-instruct` — general instruction-following
-- `qwen3-coder:30b-a3b-q4_K_M` — code generation, 19GB, MoE architecture (3B active params) — used by OpenHands
 - `llama3.2:3b` — fast lightweight model
-
-> **Note:** `qwen3-coder` only comes in 30b and 480b variants — there is no 14b. The 30b MoE model runs efficiently despite its size because only ~3B parameters are active per token.
 
 Edit the `entrypoint` block in `docker-compose.yml` to add or swap models.
 
@@ -74,67 +70,19 @@ sudo touch /opt/librechat/librechat.yaml
 
 See the [LibreChat docs](https://www.librechat.ai/docs/configuration/librechat_yaml) for configuration options.
 
-### 4. Create the OpenHands directories
-
-OpenHands uses host paths for its workspace and state so that settings and files survive stack redeployments:
-
-```bash
-sudo mkdir -p /opt/openhands/workspace
-sudo mkdir -p /opt/openhands/state
-```
-
-Creating these manually avoids permission issues on first run.
-
-### 5. Start the stack
+### 4. Start the stack
 
 ```bash
 docker compose up -d
 ```
 
-Ollama will pull models on first start. `qwen3-coder:30b-a3b-q4_K_M` is ~19GB — allow 10–20 minutes depending on your connection.
+Ollama will pull models on first start — allow a few minutes depending on model size and connection speed.
 
-### 6. Access the UIs
+### 5. Access the UIs
 
 - LibreChat: `http://your-server-ip:3000`
 - AnythingLLM: `http://your-server-ip:3001`
 - n8n: `http://your-server-ip:5678`
-- OpenHands: `http://your-server-ip:3002`
-
-## OpenHands First-Time Setup
-
-On first visit, OpenHands shows a provider setup wizard. Complete it once:
-
-1. **LLM Provider** → select **Ollama**
-2. **Model** → `qwen3-coder:30b-a3b-q4_K_M`
-3. **Base URL** → `http://ollama:11434`
-4. **API Key** → `ollama` (required field — any non-empty value works with Ollama)
-5. Click **Save**
-
-> The `LLM_MODEL`, `LLM_BASE_URL`, and `LLM_API_KEY` env vars are set in the compose and configure the backend. The wizard configures the browser-side client and must be completed once per browser.
-
-> **Port binding note:** If OpenHands' port (3002) shows as unreachable after a redeploy, restart the container from Portainer (not a full stack redeploy). This re-establishes the Docker iptables NAT rule.
-
-### OpenHands runtime image versioning
-
-OpenHands spawns sandbox containers using a separate runtime image. The `openhands:latest` and `runtime:latest` tags can fall out of sync with each other, causing the runtime container to fail to start with an error like:
-
-```
-exec: "/openhands/micromamba/bin/micromamba": no such file or directory
-```
-
-The runtime image tag format is `{openhands-version}-nikolaik`. To find the correct tag:
-
-```bash
-docker run --rm --entrypoint="" ghcr.io/all-hands-ai/openhands:latest \
-  python3 -c "import openhands; print(openhands.__version__)"
-# e.g. 0.59.0 → use ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik
-```
-
-Set `SANDBOX_RUNTIME_CONTAINER_IMAGE` to the matching versioned tag (see Portainer section below). When upgrading OpenHands, update this value to match the new version.
-
-### host.docker.internal on Linux
-
-On Linux Docker Engine (not Docker Desktop), `host.docker.internal` does not resolve by default. OpenHands uses this hostname to communicate with its spawned runtime containers. The compose file includes `extra_hosts: host.docker.internal:host-gateway` to handle this automatically — no manual action needed, but if you replicate this setup outside of this compose file, include that entry.
 
 ## n8n + Ollama + AnythingLLM Integration
 
@@ -177,24 +125,8 @@ AnythingLLM exposes a REST API. Use the **HTTP Request** node:
 | Repository reference | `refs/heads/master` |
 | Compose path | `ai-stack/docker-compose.yml` |
 
-3. Under **Environment variables**, add every value from `.env.example`, plus:
-
-| Variable | Value |
-|----------|-------|
-| `SANDBOX_RUNTIME_CONTAINER_IMAGE` | `ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik` (update to match OpenHands version) |
-| `OPENHANDS_GITHUB_TOKEN` | Your GitHub personal access token (persists across redeploys — avoids re-entering in the UI) |
-
+3. Under **Environment variables**, add every value from `.env.example`
 4. Click **Deploy the stack**
-
-> **Large image warning:** OpenHands is a large image and may cause a 504 timeout in Portainer. If this happens, pre-pull on the host first:
-> ```bash
-> docker pull ghcr.io/all-hands-ai/openhands:latest
-> # Check version, then pull matching runtime:
-> docker run --rm --entrypoint="" ghcr.io/all-hands-ai/openhands:latest \
->   python3 -c "import openhands; print(openhands.__version__)"
-> docker pull ghcr.io/all-hands-ai/runtime:0.59.0-nikolaik
-> ```
-> Then redeploy — Portainer will use the cached images.
 
 ## Authentik SSO for LibreChat (Optional)
 
