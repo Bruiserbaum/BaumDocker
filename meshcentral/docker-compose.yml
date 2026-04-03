@@ -1,0 +1,44 @@
+services:
+  meshcentral:
+    image: ghcr.io/ylianst/meshcentral:latest
+    container_name: meshcentral
+    restart: unless-stopped
+    ports:
+      # Expose directly for agent connections and web UI.
+      # If you are using Nginx Proxy Manager to front this, keep these
+      # and point NPM at port 4430.  Remove 80 if NPM handles redirects.
+      - "4430:4430"
+      - "80:80"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - HOSTNAME=${HOSTNAME:-mesh.yourdomain.com}
+      - ALLOW_NEW_ACCOUNTS=${ALLOW_NEW_ACCOUNTS:-false}
+      - ALLOW_PLUGINS=${ALLOW_PLUGINS:-false}
+      - WEBRTC=${WEBRTC:-false}
+      - IFRAME=${IFRAME:-false}
+      - MINIFY=${MINIFY:-true}
+      # Reverse proxy settings — set REVERSE_PROXY to your NPM/nginx container IP
+      # so MeshCentral trusts X-Forwarded-For and accepts HTTP from the proxy.
+      - REVERSE_PROXY=${REVERSE_PROXY:-}
+      - REVERSE_PROXY_TLS_PORT=${REVERSE_PROXY_TLS_PORT:-443}
+      # Uncomment to use MongoDB instead of the embedded NeDB (< 100 devices)
+      # - USE_MONGODB=true
+      # - MONGO_URL=${MONGO_URL:-}
+    volumes:
+      - meshcentral-data:/opt/meshcentral/meshcentral-data
+      - meshcentral-backups:/opt/meshcentral/meshcentral-backups
+      - meshcentral-files:/opt/meshcentral/meshcentral-files
+      - meshcentral-web:/opt/meshcentral/meshcentral-web
+    healthcheck:
+      test: ["CMD", "curl", "-kfs", "https://localhost:4430/health.ashx"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  meshcentral-data:
+  meshcentral-backups:
+  meshcentral-files:
+  meshcentral-web:

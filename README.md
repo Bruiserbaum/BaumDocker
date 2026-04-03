@@ -21,6 +21,7 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 | [jellyfin](jellyfin/) | Free open-source media server — no account or Plex Pass required, full hardware transcode support | [jellyfin/jellyfin](https://github.com/jellyfin/jellyfin) |
 | [karakeep](karakeep/) | Self-hosted bookmark manager with full-page archiving, video downloads, and AI summarization | [karakeep-app/karakeep](https://github.com/karakeep-app/karakeep) |
 | [mailcow](mailcow/) | Full self-hosted email server — Postfix, Dovecot, Rspamd, ClamAV, SOGo webmail, and automatic SSL in one stack | [mailcow/mailcow-dockerized](https://github.com/mailcow/mailcow-dockerized) |
+| [meshcentral](meshcentral/) | Self-hosted remote device management — remote desktop, SSH, file transfer, and agent-based monitoring for Windows, macOS, and Linux | [Ylianst/MeshCentral](https://github.com/Ylianst/MeshCentral) |
 | [mumble](mumble/) | Self-hosted low-latency voice chat server — no accounts or subscriptions required | [mumble-voip/mumble](https://github.com/mumble-voip/mumble) |
 | [nextcloud](nextcloud/) | Self-hosted file sync and share — all-in-one deployment with automatic database, cache, backup, and Talk setup | [nextcloud/all-in-one](https://github.com/nextcloud/all-in-one) |
 | [nginx-proxy-manager](nginx-proxy-manager/) | Reverse proxy with web UI and automatic Let's Encrypt SSL — no config files needed | [NginxProxyManager/nginx-proxy-manager](https://github.com/NginxProxyManager/nginx-proxy-manager) |
