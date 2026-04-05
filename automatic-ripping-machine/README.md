@@ -22,11 +22,13 @@ chmod +x setup.sh && sudo ./setup.sh
 `setup.sh` handles everything in one pass:
 - Installs `lsscsi` if not present
 - Creates the `arm` user and group on the host
-- Creates `/home/arm/{logs,media,music,config}` with correct ownership
-- Prompts for your timezone and writes a `.env` file with the correct `ARM_UID`/`ARM_GID`
+- Prompts for each storage path — enter a GlusterFS path (e.g. `/mnt/gluster/arm/media`) or press Enter to keep the default under `/home/arm`
+- Creates all directories with correct ownership
+- Prompts for timezone
+- Writes a complete `.env` file
 - Detects optical drives and prints the exact `devices:` lines to add to `docker-compose.yml`
 
-After it runs, edit `docker-compose.yml` to add your detected drives, then:
+After it runs, update the `devices:` section in `docker-compose.yml` with your drive(s), then:
 
 ```bash
 docker compose up -d
@@ -34,31 +36,46 @@ docker compose up -d
 
 ### Option B — Manual
 
-**1. Create the arm user and directories**
+**1. Create the arm user**
 
 ```bash
-sudo useradd -m -d /home/arm -g arm arm
-sudo mkdir -p /home/arm/{logs,media,music,config}
-sudo chown -R arm:arm /home/arm
+sudo groupadd arm
+sudo useradd -m -d /home/arm -g arm -s /usr/sbin/nologin arm
 ```
 
-**2. Find your optical drive**
+**2. Copy and edit `.env`**
+
+```bash
+cp .env.example .env
+```
+
+Set `ARM_UID` and `ARM_GID` to match the arm user:
+
+```bash
+sed -i "s/^ARM_UID=.*/ARM_UID=$(id -u arm)/" .env
+sed -i "s/^ARM_GID=.*/ARM_GID=$(id -g arm)/" .env
+```
+
+Update `ARM_MEDIA` and `ARM_MUSIC` if you want output on GlusterFS or a separate drive.
+
+**3. Create directories and set ownership**
+
+```bash
+source .env
+for DIR in "$ARM_HOME" "$ARM_LOGS" "$ARM_CONFIG" "$ARM_MEDIA" "$ARM_MUSIC"; do
+    sudo mkdir -p "$DIR" && sudo chown arm:arm "$DIR"
+done
+```
+
+**4. Find your optical drive**
 
 ```bash
 lsscsi -g
 ```
 
-Add one `devices` entry per drive to `docker-compose.yml`.
+Add one `devices:` entry per drive to `docker-compose.yml`.
 
-**3. Write a `.env` file**
-
-```bash
-echo "ARM_UID=$(id -u arm)" >> .env
-echo "ARM_GID=$(id -g arm)" >> .env
-echo "TZ=America/New_York"  >> .env
-```
-
-**4. Start**
+**5. Start**
 
 ```bash
 docker compose up -d
@@ -68,35 +85,61 @@ docker compose up -d
 
 `http://your-server-ip:8082` — default login: `admin` / `password`
 
-## Volumes
+---
 
-| Host Path | Container Path | Purpose |
-|-----------|---------------|---------|
-| `/home/arm` | `/home/arm` | ARM home directory |
-| `/home/arm/logs` | `/home/arm/logs` | Rip and transcode logs |
-| `/home/arm/media` | `/home/arm/media` | DVD/Blu-ray output |
-| `/home/arm/music` | `/home/arm/music` | CD audio output |
-| `/home/arm/config` | `/etc/arm/config` | ARM configuration files |
+## Storage Paths
 
-To redirect output to a different drive, change the host-side paths to an absolute path on your storage:
+All storage paths are configured in `.env` and injected into the compose file as volume mounts.
 
-```yaml
-- /mnt/your-drive/arm/media:/home/arm/media
-- /mnt/your-drive/arm/music:/home/arm/music
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ARM_HOME` | `/home/arm` | ARM working directory — database, UI state |
+| `ARM_LOGS` | `/home/arm/logs` | Rip and transcode log files |
+| `ARM_CONFIG` | `/home/arm/config` | `arm.yaml` and supporting config |
+| `ARM_MEDIA` | `/home/arm/media` | DVD / Blu-ray rip output |
+| `ARM_MUSIC` | `/home/arm/music` | CD audio rip output |
+
+### Using GlusterFS
+
+Point `ARM_MEDIA` and `ARM_MUSIC` at your GlusterFS mount. Keep `ARM_HOME`, `ARM_LOGS`, and `ARM_CONFIG` local for lower latency on small files.
+
+```env
+ARM_HOME=/home/arm
+ARM_LOGS=/home/arm/logs
+ARM_CONFIG=/home/arm/config
+ARM_MEDIA=/mnt/gluster/arm/media
+ARM_MUSIC=/mnt/gluster/arm/music
 ```
+
+Make sure the GlusterFS mount exists and the target directories are owned by `arm:arm` before starting the container.
+
+---
 
 ## Configuration
 
-ARM's main config file is `arm.yaml`, which ARM creates in `/home/arm/config` on first run. Key settings:
+ARM reads its settings from `arm.yaml`, which is generated in `ARM_CONFIG` on first run. The key options can be changed via the **Settings** tab in the web UI or by editing the file directly.
 
-| Setting | Description |
-|---------|-------------|
-| `TRANSCODE` | Enable/disable transcoding after rip |
-| `HANDBRAKE_CLI_PRESET` | HandBrake preset (e.g. `HQ 1080p30 Surround`) |
-| `MAX_HITS` | How many title matches to look up online |
-| `NOTIFY_RIP` / `NOTIFY_TRANSCODE` | Enable notifications (Pushbullet, Pushover, etc.) |
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `TRANSCODE` | `true` | Transcode ripped content with HandBrake |
+| `TRANSCODE_MOVIE` | `true` | Transcode movies |
+| `TRANSCODE_TV` | `true` | Transcode TV episodes |
+| `HANDBRAKE_CLI_PRESET` | `HQ 1080p30 Surround` | HandBrake preset name |
+| `RIPMETHOD` | `mkv` | `mkv` = MakeMKV, `dd` = raw disc copy |
+| `MAINFEATURE` | `false` | Rip only the longest title (main feature only) |
+| `MINLENGTH` | `600` | Minimum title length in seconds |
+| `MAXLENGTH` | `99999` | Maximum title length in seconds |
+| `EXTRAS` | `true` | Rip bonus features and extras |
+| `METADATA_PROVIDER` | `tmdb` | `tmdb` or `omdb` for disc metadata lookup |
+| `TMDB_API_KEY` | — | API key for The Movie Database |
+| `MAKEMKV_KEY` | — | MakeMKV beta key for Blu-ray support |
+| `NOTIFY_RIP` | `false` | Send notification when a rip starts |
+| `NOTIFY_TRANSCODE` | `false` | Send notification when transcoding completes |
+| `APPRISE_URL` | — | Apprise-compatible notification URL (Discord, Slack, etc.) |
 
-Edit via the web UI (Settings tab) or directly in `/home/arm/config/arm.yaml`.
+All of these are documented with defaults in `.env.example` for reference. After first run, edit them in the web UI or in `${ARM_CONFIG}/arm.yaml`.
+
+---
 
 ## Deploying via Portainer
 
@@ -109,7 +152,7 @@ Edit via the web UI (Settings tab) or directly in `/home/arm/config/arm.yaml`.
 | Repository reference | `refs/heads/master` |
 | Compose path | `automatic-ripping-machine/docker-compose.yml` |
 
-3. Under **Environment variables**, add `ARM_UID`, `ARM_GID`, and `TZ`
+3. Under **Environment variables**, add all values from `.env.example` (at minimum `ARM_UID`, `ARM_GID`, `TZ`, and the five path variables)
 4. Click **Deploy the stack**
 
 > Note: Device passthrough (`/dev/sr0`) requires Portainer to be running on the same host as the optical drive. This stack cannot be deployed to a remote agent without device access.

@@ -5,12 +5,14 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(dirname "$0")"
+
 echo "=== Automatic Ripping Machine — Docker Setup ==="
 echo ""
 
 # ── 1. lsscsi ────────────────────────────────────────────────────────────────
 if ! command -v lsscsi &>/dev/null; then
-    echo "[1/4] Installing lsscsi..."
+    echo "[1/5] Installing lsscsi..."
     if command -v apt-get &>/dev/null; then
         sudo apt-get install -y lsscsi
     elif command -v dnf &>/dev/null; then
@@ -22,11 +24,11 @@ if ! command -v lsscsi &>/dev/null; then
         exit 1
     fi
 else
-    echo "[1/4] lsscsi already installed."
+    echo "[1/5] lsscsi already installed."
 fi
 
 # ── 2. arm user / group ───────────────────────────────────────────────────────
-echo "[2/4] Checking arm user..."
+echo "[2/5] Checking arm user..."
 
 if ! getent group arm &>/dev/null; then
     sudo groupadd arm
@@ -44,25 +46,57 @@ ARM_UID=$(id -u arm)
 ARM_GID=$(id -g arm)
 echo "  arm UID=$ARM_UID  GID=$ARM_GID"
 
-# ── 3. directories ────────────────────────────────────────────────────────────
-echo "[3/4] Creating directories..."
+# ── 3. Storage paths ──────────────────────────────────────────────────────────
+echo "[3/5] Storage paths..."
+echo "  Press Enter to accept the default shown in brackets."
+echo "  To use GlusterFS, enter the mounted path (e.g. /mnt/gluster/arm/media)."
+echo ""
 
-sudo mkdir -p /home/arm/{logs,media,music,config}
-sudo chown -R arm:arm /home/arm
-echo "  /home/arm/{logs,media,music,config} — owned by arm:arm"
+read -rp "  ARM home   [/home/arm]:        " INPUT_HOME
+read -rp "  Logs       [/home/arm/logs]:   " INPUT_LOGS
+read -rp "  Config     [/home/arm/config]: " INPUT_CONFIG
+read -rp "  Media out  [/home/arm/media]:  " INPUT_MEDIA
+read -rp "  Music out  [/home/arm/music]:  " INPUT_MUSIC
 
-# ── 4. .env file ──────────────────────────────────────────────────────────────
-echo "[4/4] Writing .env..."
+ARM_HOME="${INPUT_HOME:-/home/arm}"
+ARM_LOGS="${INPUT_LOGS:-/home/arm/logs}"
+ARM_CONFIG="${INPUT_CONFIG:-/home/arm/config}"
+ARM_MEDIA="${INPUT_MEDIA:-/home/arm/media}"
+ARM_MUSIC="${INPUT_MUSIC:-/home/arm/music}"
 
-# Prompt for timezone
+# ── 4. Directories ────────────────────────────────────────────────────────────
+echo ""
+echo "[4/5] Creating directories..."
+
+for DIR in "$ARM_HOME" "$ARM_LOGS" "$ARM_CONFIG" "$ARM_MEDIA" "$ARM_MUSIC"; do
+    sudo mkdir -p "$DIR"
+    echo "  $DIR"
+done
+sudo chown -R arm:arm "$ARM_HOME"
+# Chown output dirs separately in case they are on a different mount (GlusterFS)
+sudo chown -R arm:arm "$ARM_MEDIA" "$ARM_MUSIC" "$ARM_LOGS" "$ARM_CONFIG" 2>/dev/null || true
+
+# ── 5. .env file ──────────────────────────────────────────────────────────────
+echo "[5/5] Writing .env..."
+
 DEFAULT_TZ="America/New_York"
 read -rp "  Timezone [${DEFAULT_TZ}]: " INPUT_TZ
 TZ="${INPUT_TZ:-$DEFAULT_TZ}"
 
-cat > "$(dirname "$0")/.env" <<EOF
+cat > "${SCRIPT_DIR}/.env" <<EOF
+# Identity — must match the arm user on this host
 ARM_UID=${ARM_UID}
 ARM_GID=${ARM_GID}
+
+# Timezone
 TZ=${TZ}
+
+# Storage paths
+ARM_HOME=${ARM_HOME}
+ARM_LOGS=${ARM_LOGS}
+ARM_CONFIG=${ARM_CONFIG}
+ARM_MEDIA=${ARM_MEDIA}
+ARM_MUSIC=${ARM_MUSIC}
 EOF
 
 echo "  Written: .env"
@@ -86,6 +120,7 @@ fi
 
 echo ""
 echo "Setup complete. Next steps:"
-echo "  1. Edit docker-compose.yml and add/remove devices entries to match your drives above"
+echo "  1. Edit docker-compose.yml and update the devices: section to match your drives above"
 echo "  2. docker compose up -d"
-echo "  3. Open http://\$(hostname -I | awk '{print \$1}'):8082 — default login: admin / password"
+echo "  3. Open http://$(hostname -I | awk '{print $1}'):8082 — default login: admin / password"
+echo "  4. Go to Settings to configure TRANSCODE, HandBrake preset, MakeMKV key, etc."

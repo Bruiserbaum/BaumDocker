@@ -13,11 +13,13 @@ services:
       - ARM_GID=${ARM_GID:-1000}
       - TZ=${TZ:-America/New_York}
     volumes:
-      - /home/arm:/home/arm
-      - /home/arm/logs:/home/arm/logs
-      - /home/arm/media:/home/arm/media
-      - /home/arm/music:/home/arm/music
-      - /home/arm/config:/etc/arm/config
+      # Local directories for ARM home, logs, and config
+      - ${ARM_HOME:-/home/arm}:/home/arm
+      - ${ARM_LOGS:-/home/arm/logs}:/home/arm/logs
+      - ${ARM_CONFIG:-/home/arm/config}:/etc/arm/config
+      # Output directories — point these at GlusterFS or any large storage path
+      - ${ARM_MEDIA:-/home/arm/media}:/home/arm/media
+      - ${ARM_MUSIC:-/home/arm/music}:/home/arm/music
     devices:
       # Add one entry per optical drive on your system.
       # Run setup.sh to detect drives, or manually: lsscsi -g
