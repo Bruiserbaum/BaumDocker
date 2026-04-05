@@ -20,8 +20,7 @@ services:
       POSTGRES_DB: ${PG_DB:-authentik}
       POSTGRES_PASSWORD: ${PG_PASS}
     env_file:
-      - path: .env
-        required: false
+      - .env
     networks:
       - internal
 
@@ -73,8 +72,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - path: .env
-        required: false
+      - .env
     networks:
       - internal
       - default
@@ -112,8 +110,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - path: .env
-        required: false
+      - .env
     networks:
       - internal
 

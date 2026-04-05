@@ -30,5 +30,4 @@ services:
       # SSO_CLIENT_ID: ${SSO_CLIENT_ID}
       # SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET}
     env_file:
-      - path: .env
-        required: false
+      - .env

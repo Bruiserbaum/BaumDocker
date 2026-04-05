@@ -20,8 +20,7 @@ services:
       DB_MYSQL_USER: ${DB_USER:-npm}
       DB_MYSQL_PASSWORD: ${DB_PASSWORD}
     env_file:
-      - path: .env
-        required: false
+      - .env
 
   db:
     image: jc21/mariadb-aria:latest
@@ -35,5 +34,4 @@ services:
       MYSQL_USER: ${DB_USER:-npm}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     env_file:
-      - path: .env
-        required: false
+      - .env

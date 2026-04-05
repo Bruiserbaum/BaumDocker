@@ -23,5 +23,4 @@ services:
     environment:
       TZ: ${TZ}
     env_file:
-      - path: .env
-        required: false
+      - .env

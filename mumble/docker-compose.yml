@@ -25,5 +25,4 @@ services:
       MUMBLE_CONFIG_REGISTERPUBLICSERVER: ${MUMBLE_CONFIG_REGISTERPUBLICSERVER}
       TZ: ${TZ}
     env_file:
-      - path: .env
-        required: false
+      - .env

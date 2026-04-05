@@ -7,8 +7,7 @@ services:
     ports:
       - "8082:8080"
     env_file:
-      - path: .env
-        required: false
+      - .env
     environment:
       - ARM_UID=${ARM_UID:-1000}
       - ARM_GID=${ARM_GID:-1000}

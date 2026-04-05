@@ -25,8 +25,7 @@ services:
       # NVIDIA_VISIBLE_DEVICES: all
       # NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
     env_file:
-      - path: .env
-        required: false
+      - .env
 
     # Uncomment for NVIDIA GPU transcoding:
     # deploy:

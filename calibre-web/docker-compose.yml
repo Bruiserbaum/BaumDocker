@@ -19,5 +19,4 @@ services:
       # Optional — enables the Calibre content server for OPDS and direct downloads
       DOCKER_MODS: linuxserver/mods:universal-calibre
     env_file:
-      - path: .env
-        required: false
+      - .env

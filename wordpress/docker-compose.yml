@@ -22,8 +22,7 @@ services:
       WORDPRESS_LOGGED_IN_KEY: ${WORDPRESS_LOGGED_IN_KEY}
       WORDPRESS_NONCE_KEY: ${WORDPRESS_NONCE_KEY}
     env_file:
-      - path: .env
-        required: false
+      - .env
 
   db:
     image: mariadb:11
@@ -37,5 +36,4 @@ services:
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     env_file:
-      - path: .env
-        required: false
+      - .env

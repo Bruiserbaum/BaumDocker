@@ -17,5 +17,4 @@ services:
       PUID: ${PUID}
       PGID: ${PGID}
     env_file:
-      - path: .env
-        required: false
+      - .env
