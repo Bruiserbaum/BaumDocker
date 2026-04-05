@@ -10,8 +10,7 @@ services:
       - "4430:4430"
       - "80:80"
     env_file:
-      - path: .env
-        required: false
+      - .env
     environment:
       - HOSTNAME=${HOSTNAME:-mesh.yourdomain.com}
       - ALLOW_NEW_ACCOUNTS=${ALLOW_NEW_ACCOUNTS:-false}
