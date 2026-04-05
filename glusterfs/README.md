@@ -130,6 +130,135 @@ sudo ./mount.sh <gluster-server-ip> [volume] [mount-point]
 
 > The `/etc/glusterfs` and `/var/lib/glusterd` paths are mounted directly on the host (not as named volumes) so that the glusterd daemon config survives container recreations without any data copy step.
 
+## Tiered Storage on Turing Pi / Cluster Nodes
+
+In a Turing Pi or similar ARM cluster, individual nodes often have very different storage hardware — an RK1 or CM4 module with an NVMe M.2 drive alongside compute nodes backed by larger SATA drives. GlusterFS lets you create separate volumes per storage tier so databases and latency-sensitive workloads land on NVMe while media libraries and bulk data land on SATA.
+
+### Architecture
+
+```
+┌─── TuringPiRK1 ──────────────────────────────────────────────┐
+│  NVMe M.2  ──►  /mnt/nvme-bricks  (GlusterFS brick: fast)   │
+│  host mount ◄──  /mnt/gluster-fast                           │
+└──────────────────────────────────────────────────────────────┘
+          ▲  GlusterFS protocol
+┌─── TuringPICompute3 ─────────────────────────────────────────┐
+│  SATA HDD  ──►  /mnt/sata-bricks  (GlusterFS brick: bulk)   │
+│  host mount ◄──  /mnt/gluster-bulk                           │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 1. Create separate GlusterFS volumes per tier
+
+Run these from inside the glusterfs container on the node that owns the brick:
+
+```bash
+# Fast volume — NVMe brick on RK1 node
+docker exec glusterfs gluster volume create fast \
+  TuringPiRK1:/gluster/bricks/fast force
+docker exec glusterfs gluster volume start fast
+
+# Bulk volume — SATA brick on Compute3
+docker exec glusterfs gluster volume create bulk \
+  TuringPICompute3:/gluster/bricks/bulk force
+docker exec glusterfs gluster volume start bulk
+```
+
+Mount each volume on every node that needs it:
+
+```bash
+# Fast mount (NVMe-backed)
+sudo mount -t glusterfs TuringPiRK1:/fast /mnt/gluster-fast
+
+# Bulk mount (SATA-backed)
+sudo mount -t glusterfs TuringPICompute3:/bulk /mnt/gluster-bulk
+```
+
+Add both to `/etc/fstab` for persistence:
+```
+TuringPiRK1:/fast      /mnt/gluster-fast  glusterfs  defaults,_netdev  0 0
+TuringPICompute3:/bulk /mnt/gluster-bulk  glusterfs  defaults,_netdev  0 0
+```
+
+### 2. Create named Docker volumes backed by each tier
+
+```bash
+# On the manager node
+docker volume create \
+  --driver local \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/mnt/gluster-fast \
+  fast-storage
+
+docker volume create \
+  --driver local \
+  --opt type=none \
+  --opt o=bind \
+  --opt device=/mnt/gluster-bulk \
+  bulk-storage
+```
+
+### 3. Pin services to the right node with placement constraints
+
+Use Swarm placement constraints to ensure a service always runs on the node whose storage tier it needs:
+
+```yaml
+services:
+  fast-app:
+    image: yourimage
+    volumes:
+      - fast-storage:/data
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == TuringPiRK1
+
+  bulk-app:
+    image: yourimage
+    volumes:
+      - bulk-storage:/data
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == TuringPICompute3
+
+volumes:
+  fast-storage:
+    external: true
+  bulk-storage:
+    external: true
+```
+
+> **Why placement constraints?** Named volumes created with `--opt type=none` are local to the node they were created on. The constraint guarantees the container that mounts the volume always starts on the node where the volume exists — without it, Swarm may schedule the container on a different node and fail to find the volume.
+
+### Typical tier assignments
+
+| Workload | Tier | Path |
+|----------|------|------|
+| Databases (PostgreSQL, MariaDB) | Fast (NVMe) | `/mnt/gluster-fast` |
+| App config / small state | Fast (NVMe) | `/mnt/gluster-fast` |
+| Media libraries (Jellyfin, Immich) | Bulk (SATA) | `/mnt/gluster-bulk` |
+| Backups, archives, large downloads | Bulk (SATA) | `/mnt/gluster-bulk` |
+
+### Node labels (alternative to hostname constraints)
+
+If your node names change or you want more flexibility, use node labels instead:
+
+```bash
+docker node update --label-add storage=nvme  TuringPiRK1
+docker node update --label-add storage=sata  TuringPICompute3
+```
+
+```yaml
+deploy:
+  placement:
+    constraints:
+      - node.labels.storage == nvme
+```
+
+---
+
 ## Deploying via Portainer
 
 This stack uses `network_mode: host` and `privileged: true`. Deploy it from the CLI on each node rather than via Portainer to ensure the setup script runs correctly:
