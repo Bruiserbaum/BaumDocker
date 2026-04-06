@@ -4,30 +4,36 @@ Distributed network filesystem for Docker Swarm shared storage. Runs a GlusterFS
 
 **Source:** [github.com/gluster/gluster-containers](https://github.com/gluster/gluster-containers)
 
-## How it works
+## How it works — Tiered Storage (Turing Pi)
+
+Two separate GlusterFS volumes map to the two storage tiers on the cluster:
 
 ```
-┌────────────────── Swarm Node 1 (this server) ──────────────────┐
-│  glusterfs container  ──►  brick data at /mnt/gluster-bricks   │
-│  host mount at /mnt/gluster  ◄──────────────────────────────── │
-│                                                                  │
-│  docker stack: immich    ──► bind mount /mnt/gluster/immich     │
-│  docker stack: nextcloud ──► bind mount /mnt/gluster/nextcloud  │
-└──────────────────────────────────────────────────────────────────┘
-          ▲  GlusterFS protocol (TCP port 24007 + bricks)
-┌─────────┴──────── Swarm Node 2 (future) ────────────────────────┐
-│  glusterfs container  ──►  replicated brick                     │
-│  host mount at /mnt/gluster  (same path, replicated data)       │
-└──────────────────────────────────────────────────────────────────┘
+┌─── TuringPiRK1 (NVMe) ──────────────────────────────────────────────────┐
+│  glusterfs container  ──►  /mnt/nvme/docker-volumes/gluster-bricks/fast  │
+│  host mount at /mnt/gluster-fast  ◄─────────────────────────────────────│
+│                                                                            │
+│  immich postgres  ──► /mnt/gluster-fast/immich/postgres                   │
+│  immich ML cache  ──► /mnt/gluster-fast/immich/model-cache                │
+│  vaultwarden      ──► /mnt/gluster-fast/vaultwarden                       │
+└────────────────────────────────────────────────────────────────────────────┘
+          ▲  GlusterFS protocol (TCP 24007)
+┌─── TuringPICompute3 (SATA) ─────────────────────────────────────────────┐
+│  glusterfs container  ──►  /mnt/gluster-bricks/bulk                      │
+│  host mount at /mnt/gluster-bulk  ◄─────────────────────────────────────│
+│                                                                            │
+│  immich photos    ──► /mnt/gluster-bulk/immich/photos                     │
+│  jellyfin/plex    ──► /mnt/gluster-bulk/media/{movies,tv,music}           │
+│  ARM rips         ──► /mnt/gluster-bulk/arm/{media,music}                 │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Other stacks reference GlusterFS simply as a host bind mount:
+Other stacks reference the mounts as plain host bind mounts — no Docker plugin needed:
 ```yaml
 volumes:
-  - /mnt/gluster/myapp:/data
+  - /mnt/gluster-fast/myapp:/data    # databases, config
+  - /mnt/gluster-bulk/myapp:/media   # large files
 ```
-
-No Docker volume plugin or special driver needed.
 
 ## Ports
 
@@ -148,37 +154,32 @@ In a Turing Pi or similar ARM cluster, individual nodes often have very differen
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 1. Create separate GlusterFS volumes per tier
+### 1. Run setup-tiered.sh on TuringPiRK1
 
-Run these from inside the glusterfs container on the node that owns the brick:
-
-```bash
-# Fast volume — NVMe brick on RK1 node
-docker exec glusterfs gluster volume create fast \
-  TuringPiRK1:/gluster/bricks/fast force
-docker exec glusterfs gluster volume start fast
-
-# Bulk volume — SATA brick on Compute3
-docker exec glusterfs gluster volume create bulk \
-  TuringPICompute3:/gluster/bricks/bulk force
-docker exec glusterfs gluster volume start bulk
-```
-
-Mount each volume on every node that needs it:
+`setup-tiered.sh` handles everything in one pass from TuringPiRK1:
+- Waits for glusterd to be ready
+- Peers with TuringPICompute3
+- Creates brick directories on both nodes
+- Creates and starts the `fast` (NVMe) and `bulk` (SATA) GlusterFS volumes
+- Applies performance tuning per tier
+- Mounts both volumes on TuringPiRK1
+- Creates subdirectories for all BaumDocker stacks under each tier
 
 ```bash
-# Fast mount (NVMe-backed)
-sudo mount -t glusterfs TuringPiRK1:/fast /mnt/gluster-fast
-
-# Bulk mount (SATA-backed)
-sudo mount -t glusterfs TuringPICompute3:/bulk /mnt/gluster-bulk
+chmod +x setup-tiered.sh && sudo ./setup-tiered.sh
 ```
 
-Add both to `/etc/fstab` for persistence:
+### 2. Run mount-tiered.sh on all other nodes
+
+On TuringPICompute3 and any additional swarm node, run:
+
+```bash
+chmod +x mount-tiered.sh && sudo ./mount-tiered.sh
+# defaults to TuringPiRK1 (fast) and TuringPICompute3 (bulk)
+# or: ./mount-tiered.sh <rk1-host> <compute3-host>
 ```
-TuringPiRK1:/fast      /mnt/gluster-fast  glusterfs  defaults,_netdev  0 0
-TuringPICompute3:/bulk /mnt/gluster-bulk  glusterfs  defaults,_netdev  0 0
-```
+
+The script installs glusterfs-client if needed, mounts both volumes, and prints the `/etc/fstab` lines for persistence.
 
 ### 2. Create named Docker volumes backed by each tier
 
