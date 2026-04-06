@@ -32,6 +32,12 @@ All sensitive values (API keys, secrets, tokens) have been replaced with `REPLAC
 
 ---
 
+## Cluster Setup
+
+Running these stacks on a Turing Pi 2 cluster? See the **[Turing Pi 2 Cluster Setup Guide](CLUSTER_SETUP.md)** for a full walkthrough of node configuration, Docker Swarm initialization, NVMe/SATA storage setup, NAS backup, Portainer deployment, and maintenance scripts.
+
+---
+
 ## Conventions
 
 - Secrets use `REPLACE_WITH_HEX_SECRET` — generate with `openssl rand -hex 32`
