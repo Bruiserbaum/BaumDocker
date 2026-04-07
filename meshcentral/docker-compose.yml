@@ -1,7 +1,6 @@
 services:
   meshcentral:
     image: ghcr.io/ylianst/meshcentral:latest
-    container_name: meshcentral
     restart: unless-stopped
     ports:
       # Expose directly for agent connections and web UI.
@@ -33,6 +32,12 @@ services:
       interval: 60s
       timeout: 10s
       retries: 3
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == TuringPiRK1
 
 volumes:
   meshcentral-data:
