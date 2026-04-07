@@ -21,8 +21,6 @@ services:
       WORDPRESS_SECURE_AUTH_KEY: ${WORDPRESS_SECURE_AUTH_KEY}
       WORDPRESS_LOGGED_IN_KEY: ${WORDPRESS_LOGGED_IN_KEY}
       WORDPRESS_NONCE_KEY: ${WORDPRESS_NONCE_KEY}
-    env_file:
-      - .env
 
   db:
     image: mariadb:11
@@ -35,5 +33,3 @@ services:
       MYSQL_USER: ${WORDPRESS_DB_USER:-wordpress}
       MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    env_file:
-      - .env

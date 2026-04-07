@@ -29,5 +29,3 @@ services:
       # SSO_AUTHORITY: ${SSO_AUTHORITY}
       # SSO_CLIENT_ID: ${SSO_CLIENT_ID}
       # SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET}
-    env_file:
-      - .env

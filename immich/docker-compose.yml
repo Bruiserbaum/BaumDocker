@@ -33,8 +33,6 @@ services:
       # OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
       # OAUTH_BUTTON_TEXT: ${OAUTH_BUTTON_TEXT:-Login with Authentik}
       # OAUTH_AUTO_REGISTER: ${OAUTH_AUTO_REGISTER:-true}
-    env_file:
-      - .env
 
   immich-machine-learning:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
@@ -43,8 +41,6 @@ services:
     volumes:
       # ML model cache — downloaded once and reused across restarts
       - ${ML_MODEL_CACHE}:/cache
-    env_file:
-      - .env
 
   redis:
     image: docker.io/redis:6.2-alpine
@@ -68,8 +64,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE_NAME}
       POSTGRES_INITDB_ARGS: "--data-checksums"
-    env_file:
-      - .env
     healthcheck:
       test: pg_isready --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' || exit 1; Chksum="$$(psql --dbname='${DB_DATABASE_NAME}' --username='${DB_USERNAME}' --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')"; echo "checksum failure count - $Chksum"; [ "$Chksum" = '0' ] || exit 1
       interval: 5m

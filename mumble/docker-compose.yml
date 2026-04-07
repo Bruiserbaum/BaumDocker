@@ -24,5 +24,3 @@ services:
       # Set to true to register on the public Mumble server list
       MUMBLE_CONFIG_REGISTERPUBLICSERVER: ${MUMBLE_CONFIG_REGISTERPUBLICSERVER}
       TZ: ${TZ}
-    env_file:
-      - .env

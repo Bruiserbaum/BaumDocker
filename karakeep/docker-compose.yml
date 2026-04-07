@@ -32,8 +32,6 @@ services:
       # OAUTH_OIDC_CLIENT_ID: ${OAUTH_OIDC_CLIENT_ID}
       # OAUTH_OIDC_CLIENT_SECRET: ${OAUTH_OIDC_CLIENT_SECRET}
       # OAUTH_OIDC_NAME: ${OAUTH_OIDC_NAME:-Authentik}
-    env_file:
-      - .env
 
   chrome:
     image: gcr.io/zenika-hub/alpine-chrome:123

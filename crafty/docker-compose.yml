@@ -22,5 +22,3 @@ services:
       - ./data/import:/crafty/import
     environment:
       TZ: ${TZ}
-    env_file:
-      - .env

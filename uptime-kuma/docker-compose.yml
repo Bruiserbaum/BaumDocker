@@ -11,5 +11,3 @@ services:
       - ./data:/app/data
     environment:
       TZ: ${TZ}
-    env_file:
-      - .env

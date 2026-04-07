@@ -9,8 +9,6 @@ services:
       # and point NPM at port 4430.  Remove 80 if NPM handles redirects.
       - "4430:4430"
       - "80:80"
-    env_file:
-      - .env
     environment:
       - HOSTNAME=${HOSTNAME:-mesh.yourdomain.com}
       - ALLOW_NEW_ACCOUNTS=${ALLOW_NEW_ACCOUNTS:-false}
