@@ -3,20 +3,20 @@ services:
     image: ghcr.io/ylianst/meshcentral:latest
     restart: unless-stopped
     ports:
-      # Standalone mode (no reverse proxy): MeshCentral serves HTTPS on 443.
-      # NPM mode: set REVERSE_PROXY below and point NPM at this host on port 443.
-      # Agents always connect on 443. Remove 80 if NPM handles HTTP redirects.
-      - "443:443"
-      - "80:80"
+      # MeshCentral serves HTTPS on port 4430 internally.
+      # Point NPM at <host-ip>:4430 with WebSockets enabled.
+      # Agents install via NPM's public domain (port 443 externally).
+      - "4430:4430"
     environment:
       - HOSTNAME=${HOSTNAME:-mesh.yourdomain.com}
+      - PORT=${PORT:-4430}
       - ALLOW_NEW_ACCOUNTS=${ALLOW_NEW_ACCOUNTS:-false}
       - ALLOW_PLUGINS=${ALLOW_PLUGINS:-false}
       - WEBRTC=${WEBRTC:-false}
       - IFRAME=${IFRAME:-false}
       - MINIFY=${MINIFY:-true}
-      # Reverse proxy settings — set REVERSE_PROXY to your NPM/nginx container IP
-      # so MeshCentral trusts X-Forwarded-For and accepts HTTP from the proxy.
+      # Set REVERSE_PROXY to your NPM container's IP so MeshCentral trusts
+      # X-Forwarded-For headers. Leave blank for standalone (no NPM).
       - REVERSE_PROXY=${REVERSE_PROXY:-}
       - REVERSE_PROXY_TLS_PORT=${REVERSE_PROXY_TLS_PORT:-443}
       # Uncomment to use MongoDB instead of the embedded NeDB (< 100 devices)
@@ -28,7 +28,7 @@ services:
       - meshcentral-files:/opt/meshcentral/meshcentral-files
       - meshcentral-web:/opt/meshcentral/meshcentral-web
     healthcheck:
-      test: ["CMD", "curl", "-kfs", "https://localhost:443/health.ashx"]
+      test: ["CMD", "curl", "-kfs", "https://localhost:4430/health.ashx"]
       interval: 60s
       timeout: 10s
       retries: 3
