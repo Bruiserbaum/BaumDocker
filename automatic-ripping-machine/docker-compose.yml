@@ -3,6 +3,12 @@ services:
     image: automaticrippingmachine/automatic-ripping-machine:latest
     container_name: arm
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${BULK_NODE:-TuringPICompute3}
     privileged: true
     ports:
       - "8082:8080"

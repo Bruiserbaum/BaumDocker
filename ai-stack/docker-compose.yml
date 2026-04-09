@@ -4,6 +4,12 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     networks:
       - ai_frontend
       - ai_backend
@@ -31,6 +37,12 @@ services:
     image: mongo:7
     container_name: librechat-mongodb
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     networks:
       - ai_backend
     volumes:
@@ -42,6 +54,12 @@ services:
     image: ghcr.io/danny-avila/librechat:latest
     container_name: librechat
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     depends_on:
       - mongodb
       - ollama
@@ -87,6 +105,12 @@ services:
     image: mintplexlabs/anythingllm:latest
     container_name: anythingllm
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     depends_on:
       - ollama
     networks:
@@ -106,6 +130,12 @@ services:
     image: n8nio/n8n:latest
     container_name: n8n
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     depends_on:
       - ollama
       - anythingllm

@@ -7,6 +7,12 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
     ports:
       - "8222:80"
     volumes:

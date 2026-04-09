@@ -37,7 +37,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == TuringPiRK1
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
 
 volumes:
   meshcentral-data:
