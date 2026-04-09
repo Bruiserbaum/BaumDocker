@@ -21,7 +21,7 @@ services:
       - "2283:2283"
     volumes:
       # Primary photo/video storage — points to your external/NAS drive
-      - ${UPLOAD_LOCATION}:/usr/src/app/upload
+      - ${UPLOAD_LOCATION:-/mnt/gluster-bulk/immich/photos}:/usr/src/app/upload
       # Gives Immich access to the host timezone
       - /etc/localtime:/etc/localtime:ro
     environment:
@@ -52,7 +52,7 @@ services:
           - node.hostname == ${FAST_NODE:-TuringPiRK1}
     volumes:
       # ML model cache — downloaded once and reused across restarts
-      - ${ML_MODEL_CACHE}:/cache
+      - ${ML_MODEL_CACHE:-/mnt/gluster-fast/immich/model-cache}:/cache
 
   redis:
     image: docker.io/redis:6.2-alpine
@@ -82,7 +82,7 @@ services:
           - node.hostname == ${FAST_NODE:-TuringPiRK1}
     volumes:
       # PostgreSQL data — recommend a fast local drive for this
-      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+      - ${DB_DATA_LOCATION:-/mnt/gluster-fast/immich/postgres}:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}

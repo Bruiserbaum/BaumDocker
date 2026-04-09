@@ -5,7 +5,6 @@ services:
 
   vaultwarden:
     image: vaultwarden/server:latest
-    container_name: vaultwarden
     restart: unless-stopped
     deploy:
       mode: replicated
@@ -17,7 +16,7 @@ services:
       - "8222:80"
     volumes:
       # All vault data, attachments, and config stored on host
-      - ${DATA_FOLDER}:/data
+      - ${DATA_FOLDER:-/mnt/gluster-fast/vaultwarden}:/data
     environment:
       DOMAIN: ${DOMAIN}
       ADMIN_TOKEN: ${ADMIN_TOKEN}
