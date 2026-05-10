@@ -1,0 +1,37 @@
+services:
+  hbbs:
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r ${DOMAIN:-rustdesk.yourdomain.com}
+    restart: unless-stopped
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+      - "21118:21118"
+    volumes:
+      - rustdesk-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
+
+  hbbr:
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr
+    restart: unless-stopped
+    ports:
+      - "21117:21117"
+      - "21119:21119"
+    volumes:
+      - rustdesk-data:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == ${FAST_NODE:-TuringPiRK1}
+
+volumes:
+  rustdesk-data:
