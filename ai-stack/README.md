@@ -14,15 +14,17 @@ A self-hosted AI stack running entirely on your home lab. Built around [Ollama](
 
 ## Models pulled on first start
 
-Ollama pulls these automatically on container startup if not already present:
+Ollama pulls models automatically on container startup. The model list is driven by env vars — no compose edits needed:
 
-- `qwen2.5:7b-instruct` — general instruction-following
-- `qwen3-coder:30b-a3b-q4_K_M` — large coding model (quantised)
-- `llama3.2:3b` — fast lightweight model
-- `qwen2.5-coder:32b` — large coding model
-- `nomic-embed-text` — text embeddings (for RAG pipelines)
+| Variable | Default |
+|----------|---------|
+| `OLLAMA_MODEL_1` | `qwen2.5:7b-instruct` |
+| `OLLAMA_MODEL_2` | `qwen3-coder:30b-a3b-q4_K_M` |
+| `OLLAMA_MODEL_3` | `llama3.2:3b` |
+| `OLLAMA_MODEL_4` | `qwen2.5-coder:32b` |
+| `OLLAMA_MODEL_5` | `nomic-embed-text` |
 
-Edit the `entrypoint` block in `docker-compose.yml` to add or swap models.
+Set any slot to an empty string to skip it. Any model from [ollama.com/library](https://ollama.com/library) is valid.
 
 ## Networks
 
@@ -181,82 +183,54 @@ Replace `user@example.com` with the account email. The `openidId` must match the
 
 For full GPU documentation see the [Ollama GPU guide](https://docs.ollama.com/gpu).
 
-### NVIDIA
+All GPU options are toggled entirely through `.env` — no compose file edits required.
 
-Add to the `ollama` service in `docker-compose.yml`:
+### AMD ROCm — RX 6900 HX / RDNA2
 
-```yaml
-deploy:
-  resources:
-    reservations:
-      devices:
-        - driver: nvidia
-          count: all
-          capabilities: [gpu]
-```
+> **Prerequisite:** AMD ROCm v7 driver must be installed on the **host** before starting the container.
+> Installing GPU drivers inside a container is not possible — the driver lives in the host kernel.
+> Install guide: `amdgpu-install` utility from [AMD ROCm documentation](https://rocm.docs.amd.com/en/latest/deploy/linux/quick_start.html).
 
-Requires the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+Set these vars in `.env` (or Portainer environment variables):
 
-### AMD (ROCm) — RX 6900 HX / RDNA2
-
-> **Requires:** AMD ROCm v7 driver. Install via the `amdgpu-install` utility from AMD's ROCm documentation.
-> **Note:** The `devices` key is not supported in Docker Swarm mode. Use standalone `docker compose up` or switch Portainer to non-Swarm (local) mode.
-
-**Step 1 — Switch to the ROCm image**
-
-In your `.env` file, set:
-
-```
+```env
+# Switch to the ROCm image
 OLLAMA_IMAGE=ollama/ollama:rocm
+
+# Point to your AMD KFD device and DRI render node
+# Find your render node with: ls /dev/dri/
+AMD_KFD_DEV=/dev/kfd
+AMD_DRI_DEV=/dev/dri/renderD128
+
+# GFX version for RX 6900 HX (RDNA2 / gfx1030)
+# Verify with: rocminfo | grep gfx
+# gfx1030 → 10.3.0 | gfx1035 → 10.3.5
+HSA_OVERRIDE_GFX_VERSION=10.3.0
 ```
 
-The `docker-compose.yml` uses `${OLLAMA_IMAGE:-ollama/ollama:latest}`, so this swap takes effect on next deploy with no compose file edits needed.
+When `AMD_KFD_DEV` and `AMD_DRI_DEV` are left blank (the default), they fall back to `/dev/null` — a harmless no-op that lets the stack start on any machine without a GPU present.
 
-**Step 2 — Uncomment the device and group blocks in `docker-compose.yml`**
+The container startup script validates that `/dev/kfd` is the real AMD device (not the null fallback) and exits with a clear error if the ROCm driver is missing.
 
-```yaml
-devices:
-  - /dev/kfd
-  - /dev/dri
-group_add:
-  - video
-  - render
-```
-
-**Step 3 — Uncomment the GFX version override**
-
-The RX 6900 HX is RDNA2 architecture (gfx1030). If Ollama does not detect your GPU automatically, uncomment this line in the `ollama` environment block:
-
-```yaml
-HSA_OVERRIDE_GFX_VERSION: "10.3.0"
-```
-
-To confirm your exact GFX version, run on the host:
-
-```bash
-rocminfo | grep gfx
-```
-
-Use the reported value (e.g. `gfx1030` maps to `"10.3.0"`, `gfx1035` maps to `"10.3.5"`).
-
-**Step 4 — (Linux) Grant container access to GPU devices**
-
-If running SELinux:
-
+If running SELinux, also run on the host:
 ```bash
 sudo setsebool container_use_devices=1
 ```
 
-Some distributions also require adding the `ollama` user to the `render` group.
-
-**Step 5 — Redeploy**
-
-```bash
-docker compose up -d ollama
-```
-
-Verify the GPU is detected inside the container:
-
+Verify GPU is active after deploying:
 ```bash
 docker exec ollama ollama ps
 ```
+
+### NVIDIA
+
+> **Prerequisite:** [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed on the host.
+
+The NVIDIA container runtime honours `NVIDIA_VISIBLE_DEVICES` natively. Set in `.env`:
+
+```env
+NVIDIA_VISIBLE_DEVICES=all   # expose all GPUs
+# or: NVIDIA_VISIBLE_DEVICES=0,1  for specific GPU indices
+```
+
+Default is `none` (disabled). No image swap needed — `ollama/ollama:latest` supports CUDA when the runtime is present.
