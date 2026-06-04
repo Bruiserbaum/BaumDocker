@@ -1,7 +1,7 @@
 services:
 
   ollama:
-    image: ollama/ollama:latest
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
     container_name: ollama
     restart: unless-stopped
     deploy:
@@ -17,20 +17,36 @@ services:
       - ollama:/root/.ollama
     ports:
       - "11434:11434"
+    # ── AMD ROCm GPU ──────────────────────────────────────────────────────────
+    # To enable AMD GPU passthrough, uncomment the devices and group_add blocks
+    # below, and set OLLAMA_IMAGE=ollama/ollama:rocm in your .env file.
+    # Also uncomment HSA_OVERRIDE_GFX_VERSION in the environment block below.
+    # Note: `devices` is not supported in Docker Swarm mode — use standalone
+    #       `docker compose up` or switch Portainer to non-Swarm (local) mode.
+    # devices:
+    #   - /dev/kfd
+    #   - /dev/dri
+    # group_add:
+    #   - video
+    #   - render
     environment:
       OLLAMA_KEEP_ALIVE: 30m
       OLLAMA_NUM_PARALLEL: 2
       OLLAMA_MAX_LOADED_MODELS: 2
+      # AMD ROCm — RX 6900 HX (RDNA2 / gfx1030)
+      # Run `rocminfo` on the host to confirm your exact GFX version first.
+      # HSA_OVERRIDE_GFX_VERSION: "10.3.0"
     entrypoint:
       - /bin/sh
       - -c
       - |
         ollama serve &
         sleep 5
-        ollama list | grep -q "qwen2.5:7b-instruct" || ollama pull qwen2.5:7b-instruct
-        ollama list | grep -q "qwen3-coder:30b-a3b"   || ollama pull qwen3-coder:30b-a3b-q4_K_M
+        ollama list | grep -q "qwen2.5:7b-instruct"  || ollama pull qwen2.5:7b-instruct
+        ollama list | grep -q "qwen3-coder:30b-a3b"  || ollama pull qwen3-coder:30b-a3b-q4_K_M
         ollama list | grep -q "llama3.2:3b"          || ollama pull llama3.2:3b
-        ollama list | grep -q "deepseek-coder:33b"   || ollama pull deepseek-coder:33b
+        ollama list | grep -q "qwen2.5-coder:32b"    || ollama pull qwen2.5-coder:32b
+        ollama list | grep -q "nomic-embed-text"     || ollama pull nomic-embed-text
         wait
 
   mongodb:
