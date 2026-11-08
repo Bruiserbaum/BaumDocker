@@ -1,66 +1,9 @@
 services:
 
-  ollama:
-    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
-    container_name: ollama
-    restart: unless-stopped
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.hostname == ${FAST_NODE:-TuringPiRK1}
-    networks:
-      - ai_frontend
-      - ai_backend
-    volumes:
-      - ollama:/root/.ollama
-    ports:
-      - "11434:11434"
-    # AMD ROCm device passthrough.
-    # Set AMD_KFD_DEV=/dev/kfd and AMD_DRI_DEV=/dev/dri/renderD128 in .env to enable.
-    # Default /dev/null mapping is a harmless no-op when AMD is disabled.
-    # Find your render node with: ls /dev/dri/
-    devices:
-      - ${AMD_KFD_DEV:-/dev/null}:/dev/kfd
-      - ${AMD_DRI_DEV:-/dev/null}:/dev/dri/renderD128
-    group_add:
-      - video
-      - render
-    environment:
-      OLLAMA_KEEP_ALIVE: 30m
-      OLLAMA_NUM_PARALLEL: 2
-      OLLAMA_MAX_LOADED_MODELS: 2
-      # GPU toggles — see .env.example for full usage
-      OLLAMA_IMAGE: ${OLLAMA_IMAGE:-ollama/ollama:latest}
-      HSA_OVERRIDE_GFX_VERSION: ${HSA_OVERRIDE_GFX_VERSION:-}
-      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-none}
-      # Models pulled on startup — set slot to empty string to skip
-      OLLAMA_MODEL_1: ${OLLAMA_MODEL_1:-qwen2.5:7b-instruct}
-      OLLAMA_MODEL_2: ${OLLAMA_MODEL_2:-qwen3-coder:30b-a3b-q4_K_M}
-      OLLAMA_MODEL_3: ${OLLAMA_MODEL_3:-llama3.2:3b}
-      OLLAMA_MODEL_4: ${OLLAMA_MODEL_4:-qwen2.5-coder:32b}
-      OLLAMA_MODEL_5: ${OLLAMA_MODEL_5:-nomic-embed-text}
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        if echo "$OLLAMA_IMAGE" | grep -q "rocm"; then
-          kfd_major=$(ls -l /dev/kfd 2>/dev/null | awk '{print $5}' | tr -d ',')
-          if [ -z "$kfd_major" ] || [ "$kfd_major" = "1" ]; then
-            echo "ERROR: OLLAMA_IMAGE=ollama/ollama:rocm but /dev/kfd is not available."
-            echo "Install AMD ROCm driver on the host first: https://docs.ollama.com/gpu"
-            exit 1
-          fi
-          echo "AMD ROCm: /dev/kfd verified (major=${kfd_major}), GPU acceleration active."
-        fi
-        ollama serve &
-        sleep 5
-        for model in "$OLLAMA_MODEL_1" "$OLLAMA_MODEL_2" "$OLLAMA_MODEL_3" "$OLLAMA_MODEL_4" "$OLLAMA_MODEL_5"; do
-          [ -z "$model" ] && continue
-          ollama list | grep -q "$model" || ollama pull "$model"
-        done
-        wait
+  # NOTE: the `ollama` service is intentionally omitted here — this deployment
+  # uses a native Ollama instance already running on the Docker host
+  # (systemd --user service, Vulkan GPU accel) instead of a containerized one.
+  # OLLAMA_BASE_URL below points at the host's LAN IP for that reason.
 
   mongodb:
     image: mongo:7
@@ -91,7 +34,6 @@ services:
           - node.hostname == ${FAST_NODE:-TuringPiRK1}
     depends_on:
       - mongodb
-      - ollama
     networks:
       - ai_frontend
       - ai_backend
@@ -99,7 +41,7 @@ services:
       - "3000:3080"
     environment:
       MONGO_URI: mongodb://mongodb:27017/LibreChat
-      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_BASE_URL: http://192.168.9.10:11434
       ALLOW_EMAIL_LOGIN: ${LIBRECHAT_ALLOW_EMAIL_LOGIN:-true}
       ALLOW_REGISTRATION: ${LIBRECHAT_ALLOW_REGISTRATION:-false}
       ALLOW_SOCIAL_LOGIN: ${LIBRECHAT_ALLOW_SOCIAL_LOGIN:-false}
@@ -126,7 +68,7 @@ services:
       OPENID_GENERATE_NONCE: "false"
       OPENID_USE_END_SESSION_ENDPOINT: "true"
     volumes:
-      - /opt/librechat/librechat.yaml:/app/librechat.yaml:ro
+      - ./librechat.yaml:/app/librechat.yaml:ro
       - librechat_uploads:/app/client/public/uploads
       - librechat_data:/app/data
 
@@ -140,20 +82,19 @@ services:
       placement:
         constraints:
           - node.hostname == ${FAST_NODE:-TuringPiRK1}
-    depends_on:
-      - ollama
     networks:
       - ai_frontend
       - ai_backend
     ports:
       - "3001:3001"
     environment:
-      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_BASE_URL: http://192.168.9.10:11434
       STORAGE_DIR: /app/server/storage
       JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - anythingllm_storage:/app/server/storage
+      - /home/bruiserbaum/Desktop/Bruiserbaum:/vault:ro
 
   n8n:
     image: n8nio/n8n:latest
@@ -166,7 +107,6 @@ services:
         constraints:
           - node.hostname == ${FAST_NODE:-TuringPiRK1}
     depends_on:
-      - ollama
       - anythingllm
     networks:
       - ai_frontend
@@ -178,7 +118,7 @@ services:
       N8N_PORT: 5678
       N8N_PROTOCOL: http
       WEBHOOK_URL: ${N8N_WEBHOOK_URL}
-      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_BASE_URL: http://192.168.9.10:11434
       ANYTHINGLLM_BASE_URL: http://anythingllm:3001
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       N8N_USER_MANAGEMENT_JWT_SECRET: ${N8N_USER_MANAGEMENT_JWT_SECRET}
@@ -186,6 +126,41 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
+  # ── obsidian-ai — visual agent/workflow orchestration platform ──
+  # https://github.com/sup3rus3r/obsidian-ai
+  # Frontend hardcodes API calls to http://localhost:8001, so it must share
+  # the backend container's network namespace rather than talk over the
+  # bridge network by service name.
+  obsidian-ai-backend:
+    build:
+      context: /home/bruiserbaum/baumhub/obsidian-ai/backend
+    container_name: obsidian-ai-backend
+    restart: unless-stopped
+    env_file:
+      - /home/bruiserbaum/baumhub/obsidian-ai/backend/.env
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "8101:8001"
+      - "3100:3000"
+    volumes:
+      - obsidian_ai_data:/data
+      - /home/bruiserbaum/Desktop/Bruiserbaum:/vault:ro
+
+  obsidian-ai-frontend:
+    build:
+      context: /home/bruiserbaum/baumhub/obsidian-ai
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_ENCRYPTION_KEY: ${OBSIDIAN_AI_ENCRYPTION_KEY}
+    container_name: obsidian-ai-frontend
+    restart: unless-stopped
+    network_mode: "service:obsidian-ai-backend"
+    env_file:
+      - /home/bruiserbaum/baumhub/obsidian-ai/frontend/.env.local
+    depends_on:
+      - obsidian-ai-backend
 
 networks:
   ai_frontend:
@@ -194,9 +169,9 @@ networks:
     driver: bridge
 
 volumes:
-  ollama:
   mongo:
   librechat_uploads:
   librechat_data:
   anythingllm_storage:
   n8n_data:
+  obsidian_ai_data:

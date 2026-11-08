@@ -5,6 +5,11 @@
 !**/.env.example
 docker-compose.override.yml
 
+# Runtime state bind-mounted from the host, not source - code-server/config
+# holds its extensions/workspace cache plus .ssh/.claude/.codex/.gemini
+# credential dirs, so this must never be staged.
+code-server/config/
+
 # OS
 .DS_Store
 Thumbs.db
