@@ -1,0 +1,45 @@
+services:
+
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    restart: unless-stopped
+    networks:
+      - ai_frontend
+      - ai_backend
+    ports:
+      - "${CODE_SERVER_PORT:-8090}:8443"
+    volumes:
+      - ./config:/config
+      # Workspace = ~/Projects only (BaumAI, BaumAgent, BaumDocker,
+      # baumagent-clients, ai-env) — deliberately NOT the whole home dir or
+      # the Obsidian vault. Owned by PUID/PGID below (your host user), so no
+      # root-owned-file permission fights like BaumAI's data/repos sandbox
+      # dirs (those are root-owned per-task checkouts, not meant for manual
+      # browser editing — see docs/SPEC.md §3, §9 in BaumAI).
+      - ${CODE_SERVER_WORKSPACE:-/home/bruiserbaum/Projects}:/config/workspace
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-America/Chicago}
+      # Defense-in-depth, matching the rest of the ai-stack (LibreChat,
+      # AnythingLLM etc. keep their own login even behind Authentik's
+      # forward-auth at the NPM layer — see ../authentik/snippets/). Set a
+      # real value in .env; do not leave this blank, since this box's
+      # existing trust boundary already accepts LAN-exposed ports gated only
+      # by proxy-level auth once that's in place, and code-server's terminal
+      # is a much higher-value target than a chat UI.
+      PASSWORD: ${CODE_SERVER_PASSWORD}
+      DEFAULT_WORKSPACE: /config/workspace
+    # No /var/run/docker.sock mount — deliberately no Docker-outside-of-Docker
+    # access from this container (unlike BaumAI's worker). Run docker/compose
+    # commands over SSH instead. Revisit only if that becomes a real workflow
+    # friction point.
+
+networks:
+  ai_frontend:
+    external: true
+    name: ${AISTACK_FRONTEND_NET:-ai-stack_ai_frontend}
+  ai_backend:
+    external: true
+    name: ${AISTACK_BACKEND_NET:-ai-stack_ai_backend}
