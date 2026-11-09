@@ -15,6 +15,16 @@ services:
       # one container on this box with broad docker.sock access.
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+      # ai-stack's obsidian-ai-backend/frontend build from this path (outside
+      # any git repo, so it can't just live in the stack's own clone).
+      # Portainer runs `docker compose build` from inside this container, and
+      # build context is read client-side (unlike volumes:, which the host's
+      # Docker daemon resolves directly) - so without this mount, that
+      # absolute path doesn't exist from Portainer's point of view even
+      # though it's real on the host. Same absolute path on both sides so
+      # every reference to it elsewhere (ai-stack/docker-compose.yml) needs
+      # no rewriting.
+      - /home/bruiserbaum/baumhub/obsidian-ai:/home/bruiserbaum/baumhub/obsidian-ai:ro
 
 volumes:
   portainer_data:
