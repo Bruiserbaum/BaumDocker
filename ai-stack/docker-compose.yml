@@ -137,8 +137,19 @@ services:
     pull_policy: build
     container_name: obsidian-ai-backend
     restart: unless-stopped
-    env_file:
-      - /home/bruiserbaum/baumhub/obsidian-ai/backend/.env
+    # Was env_file pointing at an absolute host path - broke under
+    # Portainer, which runs docker compose from inside its own container
+    # (only /var/run/docker.sock + its data volume are mounted into it, not
+    # the host's /home/bruiserbaum/baumhub) and reads env_file client-side,
+    # unlike volumes below which the host's Docker daemon resolves directly.
+    environment:
+      ENCRYPTION_KEY: ${OBSIDIAN_AI_BACKEND_ENCRYPTION_KEY:-}
+      JWT_SECRET_KEY: ${OBSIDIAN_AI_JWT_SECRET_KEY:-}
+      JWT_ALGORITHM: ${OBSIDIAN_AI_JWT_ALGORITHM:-HS256}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${OBSIDIAN_AI_JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-}
+      PROVIDER_KEY_SECRET: ${OBSIDIAN_AI_PROVIDER_KEY_SECRET:-}
+      DATABASE_TYPE: ${OBSIDIAN_AI_DATABASE_TYPE:-sqlite}
+      DATABASE_URL: ${OBSIDIAN_AI_DATABASE_URL:-}
     networks:
       - ai_frontend
       - ai_backend
@@ -159,8 +170,10 @@ services:
     container_name: obsidian-ai-frontend
     restart: unless-stopped
     network_mode: "service:obsidian-ai-backend"
-    env_file:
-      - /home/bruiserbaum/baumhub/obsidian-ai/frontend/.env.local
+    environment:
+      AUTH_SECRET: ${OBSIDIAN_AI_AUTH_SECRET:-}
+      AUTH_URL: ${OBSIDIAN_AI_AUTH_URL:-}
+      NEXT_PUBLIC_ENCRYPTION_KEY: ${OBSIDIAN_AI_ENCRYPTION_KEY:-}
     depends_on:
       - obsidian-ai-backend
 
