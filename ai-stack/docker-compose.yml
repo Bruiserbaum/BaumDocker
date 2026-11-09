@@ -134,6 +134,7 @@ services:
   obsidian-ai-backend:
     build:
       context: /home/bruiserbaum/baumhub/obsidian-ai/backend
+    pull_policy: build
     container_name: obsidian-ai-backend
     restart: unless-stopped
     env_file:
@@ -154,6 +155,7 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         NEXT_PUBLIC_ENCRYPTION_KEY: ${OBSIDIAN_AI_ENCRYPTION_KEY}
+    pull_policy: build
     container_name: obsidian-ai-frontend
     restart: unless-stopped
     network_mode: "service:obsidian-ai-backend"
